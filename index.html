@@ -210,7 +210,7 @@ function renderReferti(){
 
 function refreshSavedRefertiSelect(){
   const all = loadReferti();
-  qs('savedReferto').innerHTML = '<option value="">Seleziona gara salvata</option>' + all.map(r => `<option value="${r.id}">${r.dataOra} | ${r.casa} - ${r.ospite}</option>`).join('');
+  qs('savedReferto').innerHTML = '<option value="">Seleziona gara salvata</option>' + all.map(r => `<option value="${r.id}">${buildExportBaseName(r)}.json</option>`).join('');
 }
 
 function getCurrentRefertoDraft(){
@@ -246,22 +246,31 @@ function getRefertoPerExport(){
   return ref;
 }
 
+function buildExportBaseName(ref){
+  const safe = v => String(v || '').toUpperCase().replaceAll(' ', '_').replaceAll('/', '-').replaceAll("'", '').replace(/[^A-Z0-9_-]/g, '');
+  const categoria = safe(ref.categoria || 'CATEGORIA');
+  const casa = safe(ref.casa || 'CASA');
+  const ospite = safe(ref.ospite || 'OSPITE');
+  const data = safe((ref.dataOra || '').replace('T','_').replace(':','-'));
+  return `REF_${categoria}_${data}_${casa}_VS_${ospite}`;
+}
+
 function exportJsonSingolo(){
   const ref = getRefertoPerExport(); if(!ref) return;
-  download(`referto_${ref.id}.json`, JSON.stringify(ref, null, 2), 'application/json');
+  download(`${buildExportBaseName(ref)}.json`, JSON.stringify(ref, null, 2), 'application/json');
 }
 
 function exportCsvSingolo(){
   const ref = getRefertoPerExport(); if(!ref) return;
   const head=['id','dataOra','categoria','girone','giornata','campo','casa','ospite','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsiCasa','espulsiOspite','nessunAmmonitoCasa','nessunAmmonitoOspite','nessunEspulsoCasa','nessunEspulsoOspite','note','inseritoIl'];
   const line=head.map(h=>`"${String(Array.isArray(ref[h])?ref[h].join('|'):ref[h]??'').replaceAll('"','""')}"`).join(';');
-  download(`referto_${ref.id}.csv`,head.join(';')+'\n'+line,'text/csv;charset=utf-8;');
+  download(`${buildExportBaseName(ref)}.csv`,head.join(';')+'\n'+line,'text/csv;charset=utf-8;');
 }
 
 
 function exportPdfSingolo(){
   const r = getRefertoPerExport(); if(!r) return;
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Referto ${r.id}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;}h2{margin-top:0;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;vertical-align:top;} .blk{margin:10px 0;}</style></head><body><h2>Referto Gara - Torneo Città dell'Infiorata 2026</h2><div class="blk"><b>Categoria:</b> ${r.categoria} | <b>Girone:</b> ${r.girone} | <b>Giornata:</b> ${r.giornata}<br><b>Data/Ora:</b> ${r.dataOra} | <b>Campo:</b> ${r.campo}<br><b>Gara:</b> ${r.casa} - ${r.ospite} | <b>Risultato:</b> ${r.risultato}<br><b>Arbitro:</b> ${r.arbitro}</div><table><tr><th>Ammoniti Casa</th><th>Ammoniti Ospite</th></tr><tr><td>${r.nessunAmmonitoCasa?'NESSUNO':(r.ammonitiCasa||[]).join('<br>')}</td><td>${r.nessunAmmonitoOspite?'NESSUNO':(r.ammonitiOspite||[]).join('<br>')}</td></tr><tr><th>Espulsi Casa</th><th>Espulsi Ospite</th></tr><tr><td>${r.nessunEspulsoCasa?'NESSUNO':(r.espulsiCasa||[]).join('<br>')}</td><td>${r.nessunEspulsoOspite?'NESSUNO':(r.espulsiOspite||[]).join('<br>')}</td></tr></table><div class="blk"><b>Note:</b><br>${r.note||''}</div></body></html>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${buildExportBaseName(r)}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;}h2{margin-top:0;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;vertical-align:top;} .blk{margin:10px 0;}</style></head><body><h2>Referto Gara - Torneo Città dell'Infiorata 2026</h2><div class="blk"><b>Categoria:</b> ${r.categoria} | <b>Girone:</b> ${r.girone} | <b>Giornata:</b> ${r.giornata}<br><b>Data/Ora:</b> ${r.dataOra} | <b>Campo:</b> ${r.campo}<br><b>Gara:</b> ${r.casa} - ${r.ospite} | <b>Risultato:</b> ${r.risultato}<br><b>Arbitro:</b> ${r.arbitro}</div><table><tr><th>Ammoniti Casa</th><th>Ammoniti Ospite</th></tr><tr><td>${r.nessunAmmonitoCasa?'NESSUNO':(r.ammonitiCasa||[]).join('<br>')}</td><td>${r.nessunAmmonitoOspite?'NESSUNO':(r.ammonitiOspite||[]).join('<br>')}</td></tr><tr><th>Espulsi Casa</th><th>Espulsi Ospite</th></tr><tr><td>${r.nessunEspulsoCasa?'NESSUNO':(r.espulsiCasa||[]).join('<br>')}</td><td>${r.nessunEspulsoOspite?'NESSUNO':(r.espulsiOspite||[]).join('<br>')}</td></tr></table><div class="blk"><b>Note:</b><br>${r.note||''}</div></body></html>`;
   const w = window.open('', '_blank');
   w.document.write(html); w.document.close(); w.focus(); w.print();
 }
