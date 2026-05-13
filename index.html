@@ -29,6 +29,8 @@
     .checkline input { width:auto; }
     .amm-label { background: #ffe66b; padding: 2px 6px; border-radius: 6px; display: inline-block; }
     .exp-label { background: #ff6b6b; color: #fff; padding: 2px 6px; border-radius: 6px; display: inline-block; }
+    .team-col { display: flex; flex-direction: column; gap: 8px; }
+    .field-block { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
   </style>
 </head>
 <body>
@@ -53,27 +55,39 @@
   <div class="card">
     <h3>2) Inserimento referto</h3>
     <div class="grid" style="grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap:16px;">
-      <div>
+      <div class="team-col">
         <h4 style="margin:0 0 8px 0;">Squadra casa</h4>
-        <label>Gol casa</label>
-        <input class="score-input" id="golCasa" type="number" min="0" value="0" />
-        <label class="amm-label" style="margin-top:8px;">Ammoniti casa (uno per riga)</label>
-        <textarea id="ammCasa"></textarea>
-        <label class="amm-label"><input id="noAmmonitiCasa" type="checkbox" /> Nessun ammonito casa</label>
-        <label class="exp-label" style="margin-top:8px;">Espulsi casa (uno per riga)</label>
-        <textarea id="espulsiCasa"></textarea>
-        <label class="exp-label"><input id="noEspulsiCasa" type="checkbox" /> Nessun espulso casa</label>
+        <div class="field-block">
+          <label>Gol casa</label>
+          <input class="score-input" id="golCasa" type="number" min="0" value="0" />
+        </div>
+        <div class="field-block">
+          <label class="amm-label">Ammoniti casa (uno per riga)</label>
+          <textarea id="ammCasa"></textarea>
+          <label class="amm-label"><input id="noAmmonitiCasa" type="checkbox" /> Nessun ammonito casa</label>
+        </div>
+        <div class="field-block">
+          <label class="exp-label">Espulsi casa (uno per riga)</label>
+          <textarea id="espulsiCasa"></textarea>
+          <label class="exp-label"><input id="noEspulsiCasa" type="checkbox" /> Nessun espulso casa</label>
+        </div>
       </div>
-      <div>
+      <div class="team-col">
         <h4 style="margin:0 0 8px 0;">Squadra ospite</h4>
-        <label>Gol ospite</label>
-        <input class="score-input" id="golOspite" type="number" min="0" value="0" />
-        <label class="amm-label" style="margin-top:8px;">Ammoniti ospite (uno per riga)</label>
-        <textarea id="ammOspite"></textarea>
-        <label class="amm-label"><input id="noAmmonitiOspite" type="checkbox" /> Nessun ammonito ospite</label>
-        <label class="exp-label" style="margin-top:8px;">Espulsi ospite (uno per riga)</label>
-        <textarea id="espulsiOspite"></textarea>
-        <label class="exp-label"><input id="noEspulsiOspite" type="checkbox" /> Nessun espulso ospite</label>
+        <div class="field-block">
+          <label>Gol ospite</label>
+          <input class="score-input" id="golOspite" type="number" min="0" value="0" />
+        </div>
+        <div class="field-block">
+          <label class="amm-label">Ammoniti ospite (uno per riga)</label>
+          <textarea id="ammOspite"></textarea>
+          <label class="amm-label"><input id="noAmmonitiOspite" type="checkbox" /> Nessun ammonito ospite</label>
+        </div>
+        <div class="field-block">
+          <label class="exp-label">Espulsi ospite (uno per riga)</label>
+          <textarea id="espulsiOspite"></textarea>
+          <label class="exp-label"><input id="noEspulsiOspite" type="checkbox" /> Nessun espulso ospite</label>
+        </div>
       </div>
     </div>
     <div>
