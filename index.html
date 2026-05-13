@@ -96,6 +96,7 @@
       <button class="secondary" id="exportJson">Esporta JSON</button>
       <button class="secondary" id="exportCsv">Esporta CSV</button>
       <button class="secondary" id="exportPdf">Esporta PDF</button>
+      <button class="secondary" id="shareQuick">Condivisione rapida</button>
       <button class="warn" id="resetAll">Cancella tutti i referti</button>
     </div>
     <div class="result-list" style="margin-top:12px;">
@@ -137,6 +138,7 @@ function init(){
   qs('exportJson').addEventListener('click',exportJsonSingolo);
   qs('exportCsv').addEventListener('click',exportCsvSingolo);
   qs('exportPdf').addEventListener('click',exportPdfSingolo);
+  qs('shareQuick').addEventListener('click',condivisioneRapida);
   qs('resetAll').addEventListener('click',()=>{if(confirm('Confermi cancellazione completa?')){localStorage.removeItem(k);renderReferti();}});
   renderReferti();
 }
@@ -262,6 +264,46 @@ function exportPdfSingolo(){
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>Referto ${r.id}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;}h2{margin-top:0;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;vertical-align:top;} .blk{margin:10px 0;}</style></head><body><h2>Referto Gara - Torneo Città dell'Infiorata 2026</h2><div class="blk"><b>Categoria:</b> ${r.categoria} | <b>Girone:</b> ${r.girone} | <b>Giornata:</b> ${r.giornata}<br><b>Data/Ora:</b> ${r.dataOra} | <b>Campo:</b> ${r.campo}<br><b>Gara:</b> ${r.casa} - ${r.ospite} | <b>Risultato:</b> ${r.risultato}<br><b>Arbitro:</b> ${r.arbitro}</div><table><tr><th>Ammoniti Casa</th><th>Ammoniti Ospite</th></tr><tr><td>${r.nessunAmmonitoCasa?'NESSUNO':(r.ammonitiCasa||[]).join('<br>')}</td><td>${r.nessunAmmonitoOspite?'NESSUNO':(r.ammonitiOspite||[]).join('<br>')}</td></tr><tr><th>Espulsi Casa</th><th>Espulsi Ospite</th></tr><tr><td>${r.nessunEspulsoCasa?'NESSUNO':(r.espulsiCasa||[]).join('<br>')}</td><td>${r.nessunEspulsoOspite?'NESSUNO':(r.espulsiOspite||[]).join('<br>')}</td></tr></table><div class="blk"><b>Note:</b><br>${r.note||''}</div></body></html>`;
   const w = window.open('', '_blank');
   w.document.write(html); w.document.close(); w.focus(); w.print();
+}
+
+function creaTestoCondivisione(ref){
+  const ammCasa = ref.nessunAmmonitoCasa ? 'NESSUNO' : (ref.ammonitiCasa||[]).join(', ') || 'NESSUNO';
+  const ammOspite = ref.nessunAmmonitoOspite ? 'NESSUNO' : (ref.ammonitiOspite||[]).join(', ') || 'NESSUNO';
+  const espCasa = ref.nessunEspulsoCasa ? 'NESSUNO' : (ref.espulsiCasa||[]).join(', ') || 'NESSUNO';
+  const espOspite = ref.nessunEspulsoOspite ? 'NESSUNO' : (ref.espulsiOspite||[]).join(', ') || 'NESSUNO';
+  return `TORNEO CITTA DELL'INFIORATA 2026
+REF: ${ref.id}
+DATA/ORA: ${ref.dataOra}
+CATEGORIA: ${ref.categoria} | GIRONE: ${ref.girone} | GIORNATA: ${ref.giornata}
+CAMPO: ${ref.campo}
+GARA: ${ref.casa} - ${ref.ospite}
+RISULTATO: ${ref.risultato}
+ARBITRO: ${ref.arbitro}
+AMMONITI CASA: ${ammCasa}
+AMMONITI OSPITE: ${ammOspite}
+ESPULSI CASA: ${espCasa}
+ESPULSI OSPITE: ${espOspite}
+NOTE: ${ref.note || '-'}`;
+}
+
+async function condivisioneRapida(){
+  const ref = getRefertoPerExport(); if(!ref) return;
+  const text = creaTestoCondivisione(ref);
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `Referto ${ref.categoria} ${ref.casa} vs ${ref.ospite}`,
+        text
+      });
+    } catch (_) {}
+    return;
+  }
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    alert('Condivisione rapida non supportata: testo copiato negli appunti.');
+    return;
+  }
+  alert(text);
 }
 
 function download(name,content,type){
