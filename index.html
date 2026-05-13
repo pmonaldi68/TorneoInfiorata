@@ -74,7 +74,11 @@
         <label><input id="noEspulsiOspite" type="checkbox" /> Nessun espulso ospite</label>
       </div>
     </div>
-    <div><label>Note disciplinari / gara</label><textarea id="note"></textarea></div>
+    <div>
+      <label>Note disciplinari / gara</label>
+      <textarea id="note"></textarea>
+      <label><input id="noNote" type="checkbox" /> Nessuna nota disciplinare / gara</label>
+    </div>
     <div class="row" style="margin-top:12px;">
       <button id="salva">Salva referto</button>
       <button class="secondary" id="nuovo">Pulisci campi</button>
@@ -153,6 +157,7 @@ function pulisciCampi(){
   qs('noAmmonitiOspite').checked = false;
   qs('noEspulsiCasa').checked = false;
   qs('noEspulsiOspite').checked = false;
+  qs('noNote').checked = false;
 }
 
 function salvaReferto(){
@@ -166,10 +171,12 @@ function salvaReferto(){
   const ammOspiteCompilati = qs('ammOspite').value.trim();
   const espCasaCompilati = qs('espulsiCasa').value.trim();
   const espOspiteCompilati = qs('espulsiOspite').value.trim();
+  const noNote = qs('noNote').checked;
 
-  if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value || !qs('arbitro').value.trim() || qs('golCasa').value === '' || qs('golOspite').value === '' || !qs('note').value.trim()) {
+  if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value || !qs('arbitro').value.trim() || qs('golCasa').value === '' || qs('golOspite').value === '') {
     return alert('Compila tutti i campi principali del referto prima di salvare.');
   }
+  if (!noNote && !qs('note').value.trim()) return alert('Inserisci le note disciplinari o spunta Nessuna nota disciplinare / gara.');
   if (!noAmmonitiCasa && !ammCasaCompilati) return alert('Inserisci ammoniti casa o spunta Nessun ammonito casa.');
   if (!noAmmonitiOspite && !ammOspiteCompilati) return alert('Inserisci ammoniti ospite o spunta Nessun ammonito ospite.');
   if (!noEspulsiCasa && !espCasaCompilati) return alert('Inserisci espulsi casa o spunta Nessun espulso casa.');
@@ -196,7 +203,7 @@ function salvaReferto(){
     nessunAmmonitoOspite:noAmmonitiOspite,
     nessunEspulsoCasa:noEspulsiCasa,
     nessunEspulsoOspite:noEspulsiOspite,
-    note:qs('note').value.trim().toUpperCase(),
+    note:noNote ? '' : qs('note').value.trim().toUpperCase(),
     inseritoIl:new Date().toISOString()
   };
 
