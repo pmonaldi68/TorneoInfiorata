@@ -27,6 +27,8 @@
     .score-input { max-width: 90px; }
     .checkline { display:flex; align-items:center; gap:8px; margin-top:6px; }
     .checkline input { width:auto; }
+    .amm-label { background: #ffe66b; padding: 2px 6px; border-radius: 6px; display: inline-block; }
+    .exp-label { background: #ff6b6b; color: #fff; padding: 2px 6px; border-radius: 6px; display: inline-block; }
   </style>
 </head>
 <body>
@@ -55,23 +57,23 @@
         <h4 style="margin:0 0 8px 0;">Squadra casa</h4>
         <label>Gol casa</label>
         <input class="score-input" id="golCasa" type="number" min="0" value="0" />
-        <label style="margin-top:8px;">Ammoniti casa (uno per riga)</label>
+        <label class="amm-label" style="margin-top:8px;">Ammoniti casa (uno per riga)</label>
         <textarea id="ammCasa"></textarea>
-        <label><input id="noAmmonitiCasa" type="checkbox" /> Nessun ammonito casa</label>
-        <label style="margin-top:8px;">Espulsi casa (uno per riga)</label>
+        <label class="amm-label"><input id="noAmmonitiCasa" type="checkbox" /> Nessun ammonito casa</label>
+        <label class="exp-label" style="margin-top:8px;">Espulsi casa (uno per riga)</label>
         <textarea id="espulsiCasa"></textarea>
-        <label><input id="noEspulsiCasa" type="checkbox" /> Nessun espulso casa</label>
+        <label class="exp-label"><input id="noEspulsiCasa" type="checkbox" /> Nessun espulso casa</label>
       </div>
       <div>
         <h4 style="margin:0 0 8px 0;">Squadra ospite</h4>
         <label>Gol ospite</label>
         <input class="score-input" id="golOspite" type="number" min="0" value="0" />
-        <label style="margin-top:8px;">Ammoniti ospite (uno per riga)</label>
+        <label class="amm-label" style="margin-top:8px;">Ammoniti ospite (uno per riga)</label>
         <textarea id="ammOspite"></textarea>
-        <label><input id="noAmmonitiOspite" type="checkbox" /> Nessun ammonito ospite</label>
-        <label style="margin-top:8px;">Espulsi ospite (uno per riga)</label>
+        <label class="amm-label"><input id="noAmmonitiOspite" type="checkbox" /> Nessun ammonito ospite</label>
+        <label class="exp-label" style="margin-top:8px;">Espulsi ospite (uno per riga)</label>
         <textarea id="espulsiOspite"></textarea>
-        <label><input id="noEspulsiOspite" type="checkbox" /> Nessun espulso ospite</label>
+        <label class="exp-label"><input id="noEspulsiOspite" type="checkbox" /> Nessun espulso ospite</label>
       </div>
     </div>
     <div>
