@@ -79,6 +79,19 @@
 
   <div class="card">
     <h3>3) Referti inseriti</h3>
+    <div class="grid grid-3" style="margin-bottom:10px;">
+      <div>
+        <label for="exportMode">Esporta</label>
+        <select id="exportMode">
+          <option value="current">Gara attualmente inserita</option>
+          <option value="saved">Gara salvata (seleziona sotto)</option>
+        </select>
+      </div>
+      <div>
+        <label for="savedReferto">Gara salvata</label>
+        <select id="savedReferto"></select>
+      </div>
+    </div>
     <div class="row">
       <button class="secondary" id="exportJson">Esporta JSON</button>
       <button class="secondary" id="exportCsv">Esporta CSV</button>
@@ -121,9 +134,9 @@ function init(){
   document.querySelectorAll('input[type="text"], textarea').forEach(el => el.addEventListener('input', () => { el.value = el.value.toUpperCase(); }));
   qs('salva').addEventListener('click',salvaReferto);
   qs('nuovo').addEventListener('click',pulisciCampi);
-  qs('exportJson').addEventListener('click',()=>download('referti_torneo_2026.json',JSON.stringify(loadReferti(),null,2),'application/json'));
-  qs('exportCsv').addEventListener('click',exportCsv);
-  qs('exportPdf').addEventListener('click',exportPdf);
+  qs('exportJson').addEventListener('click',exportJsonSingolo);
+  qs('exportCsv').addEventListener('click',exportCsvSingolo);
+  qs('exportPdf').addEventListener('click',exportPdfSingolo);
   qs('resetAll').addEventListener('click',()=>{if(confirm('Confermi cancellazione completa?')){localStorage.removeItem(k);renderReferti();}});
   renderReferti();
 }
@@ -190,25 +203,65 @@ function salvaReferto(){
 function renderReferti(){
   const rows=loadReferti().map(r=>`<tr><td>${r.id.slice(0,8)}</td><td>${r.categoria}</td><td>${r.casa} - ${r.ospite}<br><small>${r.dataOra} | ${r.girone} | ${r.giornata} | ${r.campo}</small></td><td>${r.risultato}</td><td>${new Date(r.inseritoIl).toLocaleString('it-IT')}</td></tr>`).join('');
   qs('tbody').innerHTML=rows||'<tr><td colspan="5">Nessun referto inserito.</td></tr>';
+  refreshSavedRefertiSelect();
 }
 
-function exportCsv(){
-  const all=loadReferti();
+function refreshSavedRefertiSelect(){
+  const all = loadReferti();
+  qs('savedReferto').innerHTML = '<option value="">Seleziona gara salvata</option>' + all.map(r => `<option value="${r.id}">${r.dataOra} | ${r.casa} - ${r.ospite}</option>`).join('');
+}
+
+function getCurrentRefertoDraft(){
+  return {
+    id: 'DRAFT',
+    dataOra: qs('dataGara').value,
+    categoria: qs('categoria').value,
+    girone: qs('girone').value,
+    giornata: qs('giornata').value,
+    campo: qs('campo').value,
+    casa: qs('squadraCasa').value,
+    ospite: qs('squadraOspite').value,
+    risultato:`${Number(qs('golCasa').value)}-${Number(qs('golOspite').value)}`,
+    arbitro:qs('arbitro').value.trim().toUpperCase(),
+    ammonitiCasa:qs('noAmmonitiCasa').checked ? [] : qs('ammCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    ammonitiOspite:qs('noAmmonitiOspite').checked ? [] : qs('ammOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiCasa:qs('noEspulsiCasa').checked ? [] : qs('espulsiCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiOspite:qs('noEspulsiOspite').checked ? [] : qs('espulsiOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    nessunAmmonitoCasa:qs('noAmmonitiCasa').checked,
+    nessunAmmonitoOspite:qs('noAmmonitiOspite').checked,
+    nessunEspulsoCasa:qs('noEspulsiCasa').checked,
+    nessunEspulsoOspite:qs('noEspulsiOspite').checked,
+    note:qs('note').value.trim().toUpperCase(),
+    inseritoIl:new Date().toISOString()
+  };
+}
+
+function getRefertoPerExport(){
+  if (qs('exportMode').value === 'current') return getCurrentRefertoDraft();
+  const selectedId = qs('savedReferto').value;
+  const ref = loadReferti().find(r => r.id === selectedId);
+  if (!ref) { alert('Seleziona una gara salvata da esportare.'); return null; }
+  return ref;
+}
+
+function exportJsonSingolo(){
+  const ref = getRefertoPerExport(); if(!ref) return;
+  download(`referto_${ref.id}.json`, JSON.stringify(ref, null, 2), 'application/json');
+}
+
+function exportCsvSingolo(){
+  const ref = getRefertoPerExport(); if(!ref) return;
   const head=['id','dataOra','categoria','girone','giornata','campo','casa','ospite','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsiCasa','espulsiOspite','nessunAmmonitoCasa','nessunAmmonitoOspite','nessunEspulsoCasa','nessunEspulsoOspite','note','inseritoIl'];
-  const lines=[head.join(';')].concat(all.map(r=>head.map(h=>`"${String(Array.isArray(r[h])?r[h].join('|'):r[h]??'').replaceAll('"','""')}"`).join(';')));
-  download('referti_torneo_2026.csv',lines.join('\n'),'text/csv;charset=utf-8;');
+  const line=head.map(h=>`"${String(Array.isArray(ref[h])?ref[h].join('|'):ref[h]??'').replaceAll('"','""')}"`).join(';');
+  download(`referto_${ref.id}.csv`,head.join(';')+'\n'+line,'text/csv;charset=utf-8;');
 }
 
 
-function exportPdf(){
-  const rows = loadReferti();
-  if (!rows.length) return alert('Nessun referto da esportare.');
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Referti Torneo 2026</title><style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #999;padding:6px;text-align:left;}h2{margin-top:0;}</style></head><body><h2>Referti Torneo Città dell'Infiorata 2026</h2><table><thead><tr><th>ID</th><th>Data/Ora</th><th>Categoria</th><th>Gara</th><th>Ris.</th><th>Arbitro</th><th>Note</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.id.slice(0,8)}</td><td>${r.dataOra}</td><td>${r.categoria}</td><td>${r.casa} - ${r.ospite}</td><td>${r.risultato}</td><td>${r.arbitro}</td><td>${r.note}</td></tr>`).join('')}</tbody></table></body></html>`;
+function exportPdfSingolo(){
+  const r = getRefertoPerExport(); if(!r) return;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Referto ${r.id}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;}h2{margin-top:0;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;vertical-align:top;} .blk{margin:10px 0;}</style></head><body><h2>Referto Gara - Torneo Città dell'Infiorata 2026</h2><div class="blk"><b>Categoria:</b> ${r.categoria} | <b>Girone:</b> ${r.girone} | <b>Giornata:</b> ${r.giornata}<br><b>Data/Ora:</b> ${r.dataOra} | <b>Campo:</b> ${r.campo}<br><b>Gara:</b> ${r.casa} - ${r.ospite} | <b>Risultato:</b> ${r.risultato}<br><b>Arbitro:</b> ${r.arbitro}</div><table><tr><th>Ammoniti Casa</th><th>Ammoniti Ospite</th></tr><tr><td>${r.nessunAmmonitoCasa?'NESSUNO':(r.ammonitiCasa||[]).join('<br>')}</td><td>${r.nessunAmmonitoOspite?'NESSUNO':(r.ammonitiOspite||[]).join('<br>')}</td></tr><tr><th>Espulsi Casa</th><th>Espulsi Ospite</th></tr><tr><td>${r.nessunEspulsoCasa?'NESSUNO':(r.espulsiCasa||[]).join('<br>')}</td><td>${r.nessunEspulsoOspite?'NESSUNO':(r.espulsiOspite||[]).join('<br>')}</td></tr></table><div class="blk"><b>Note:</b><br>${r.note||''}</div></body></html>`;
   const w = window.open('', '_blank');
-  w.document.write(html);
-  w.document.close();
-  w.focus();
-  w.print();
+  w.document.write(html); w.document.close(); w.focus(); w.print();
 }
 
 function download(name,content,type){
