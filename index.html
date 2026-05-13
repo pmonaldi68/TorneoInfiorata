@@ -33,6 +33,7 @@
     .field-block { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
     .field-block textarea, .field-block input, .field-block select { background: #eef7ff; }
     .field-block input:focus, .field-block textarea:focus, select:focus, input:focus, textarea:focus { outline: 2px solid #2f67c7; outline-offset: 1px; }
+    .inline-check { display: inline-flex; align-items: center; gap: 8px; }
   </style>
 </head>
 <body>
@@ -66,12 +67,12 @@
         <div class="field-block">
           <label class="amm-label">Ammoniti casa (uno per riga)</label>
           <textarea id="ammCasa"></textarea>
-          <label class="amm-label"><input id="noAmmonitiCasa" type="checkbox" /> Nessun ammonito casa</label>
+          <label class="amm-label inline-check">Nessun ammonito casa <input id="noAmmonitiCasa" type="checkbox" /></label>
         </div>
         <div class="field-block">
           <label class="exp-label">Espulsi casa (uno per riga)</label>
           <textarea id="espulsiCasa"></textarea>
-          <label class="exp-label"><input id="noEspulsiCasa" type="checkbox" /> Nessun espulso casa</label>
+          <label class="exp-label inline-check">Nessun espulso casa <input id="noEspulsiCasa" type="checkbox" /></label>
         </div>
       </div>
       <div class="team-col">
@@ -83,19 +84,19 @@
         <div class="field-block">
           <label class="amm-label">Ammoniti ospite (uno per riga)</label>
           <textarea id="ammOspite"></textarea>
-          <label class="amm-label"><input id="noAmmonitiOspite" type="checkbox" /> Nessun ammonito ospite</label>
+          <label class="amm-label inline-check">Nessun ammonito ospite <input id="noAmmonitiOspite" type="checkbox" /></label>
         </div>
         <div class="field-block">
           <label class="exp-label">Espulsi ospite (uno per riga)</label>
           <textarea id="espulsiOspite"></textarea>
-          <label class="exp-label"><input id="noEspulsiOspite" type="checkbox" /> Nessun espulso ospite</label>
+          <label class="exp-label inline-check">Nessun espulso ospite <input id="noEspulsiOspite" type="checkbox" /></label>
         </div>
       </div>
     </div>
     <div>
       <label>Note disciplinari / gara</label>
       <textarea id="note"></textarea>
-      <label><input id="noNote" type="checkbox" /> Nessuna nota disciplinare / gara</label>
+      <label class="inline-check">Nessuna nota disciplinare / gara <input id="noNote" type="checkbox" /></label>
     </div>
     <div class="row" style="margin-top:12px;">
       <button id="salva">Salva referto</button>
