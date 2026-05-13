@@ -8,7 +8,6 @@
     :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
     body { margin: 0; background: #f3f6fb; color: #1c2430; }
     .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
-    h1 { margin-bottom: 4px; }
     .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
     .grid { display: grid; gap: 12px; }
     .grid-3 { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
@@ -32,22 +31,16 @@
   <p class="muted">Periodo torneo: dal 29 maggio 2026 al 21 giugno 2026 (Genzano di Roma).</p>
 
   <div class="card">
-    <h3>1) Selezione gara</h3>
+    <h3>1) Inserimento gara</h3>
     <div class="grid grid-3">
-      <div>
-        <label for="categoria">Categoria</label>
-        <select id="categoria"></select>
-      </div>
-      <div>
-        <label for="gara">Gara</label>
-        <select id="gara"></select>
-      </div>
-      <div>
-        <label for="campo">Campo</label>
-        <input id="campo" readonly />
-      </div>
+      <div><label for="dataGara">Data e ora</label><input id="dataGara" type="datetime-local" /></div>
+      <div><label for="categoria">Categoria</label><select id="categoria"></select></div>
+      <div><label for="girone">Girone</label><select id="girone"></select></div>
+      <div><label for="giornata">Giornata</label><select id="giornata"></select></div>
+      <div><label for="squadraCasa">Squadra casa</label><select id="squadraCasa"></select></div>
+      <div><label for="squadraOspite">Squadra ospite</label><select id="squadraOspite"></select></div>
+      <div><label for="campo">Campo</label><select id="campo"></select></div>
     </div>
-    <p id="garaInfo" class="muted"></p>
   </div>
 
   <div class="card">
@@ -58,14 +51,11 @@
       <div><label>Arbitro</label><input id="arbitro" placeholder="Nome arbitro" /></div>
     </div>
     <div class="grid grid-3">
-      <div><label>Ammoniti casa (uno per riga)</label><textarea id="ammCasa" placeholder="N.10 Rossi\nN.8 Bianchi"></textarea></div>
+      <div><label>Ammoniti casa (uno per riga)</label><textarea id="ammCasa"></textarea></div>
       <div><label>Ammoniti ospite (uno per riga)</label><textarea id="ammOspite"></textarea></div>
-      <div><label>Espulsi (indicare squadra)</label><textarea id="espulsi" placeholder="CASA - N.5 Verdi\nOSPITE - N.4 Neri"></textarea></div>
+      <div><label>Espulsi (indicare squadra)</label><textarea id="espulsi"></textarea></div>
     </div>
-    <div>
-      <label>Note disciplinari / gara</label>
-      <textarea id="note" placeholder="Eventuali note su comportamento, ricorsi, ritardi..."></textarea>
-    </div>
+    <div><label>Note disciplinari / gara</label><textarea id="note"></textarea></div>
     <div class="row" style="margin-top:12px;">
       <button id="salva">Salva referto</button>
       <button class="secondary" id="nuovo">Pulisci campi</button>
@@ -88,48 +78,56 @@
   </div>
 </div>
 <script>
-const partite = [
-  {id:1,categoria:'UNDER14',data:'2026-05-29',ora:'17:00',girone:'B',giornata:'1',casa:'ACADEMY CYNTHIA GENZANO',ospite:'NEXT GEN LODIGIANI',campo:"CITTA' DELL'INFIORATA"},
-  {id:23,categoria:'UNDER14',data:'2026-06-21',ora:'17:00',girone:'FIN',giornata:'FIN',casa:'VINCENTE_SEM1',ospite:'VINCENTE_SEM2',campo:"CITTA' DELL'INFIORATA"},
-  {id:24,categoria:'UNDER15',data:'2026-05-29',ora:'18:30',girone:'A',giornata:'1',casa:'ATLETICO LARIANO',ospite:'NEXT GEN LODIGIANI',campo:"CITTA' DELL'INFIORATA"},
-  {id:38,categoria:'UNDER15',data:'2026-06-21',ora:'19:00',girone:'FIN',giornata:'FIN',casa:'VINCENTE_SEM1',ospite:'VINCENTE_SEM2',campo:"CITTA' DELL'INFIORATA"},
-  {id:39,categoria:'UNDER16',data:'2026-05-30',ora:'19:00',girone:'A',giornata:'1',casa:'ACADEMY CYNTHIA GENZANO',ospite:'ATLETICO LARIANO',campo:'BRUNO ABBATINI'},
-  {id:61,categoria:'UNDER16',data:'2026-06-21',ora:'15:00',girone:'FIN',giornata:'FIN',casa:'VINCENTE_SEM1',ospite:'VINCENTE_SEM2',campo:'BRUNO ABBATINI'},
-  {id:62,categoria:'UNDER17',data:'2026-05-31',ora:'17:00',girone:'A',giornata:'1',casa:'COLLEFERRO CALCIO',ospite:'NEXT GEN LODIGIANI',campo:'BRUNO ABBATINI'},
-  {id:76,categoria:'UNDER17',data:'2026-06-21',ora:'17:00',girone:'FIN',giornata:'FIN',casa:'VINCENTE_SEM1',ospite:'VINCENTE_SEM2',campo:'BRUNO ABBATINI'},
-  {id:77,categoria:'UNDER19',data:'2026-05-29',ora:'17:30',girone:'A',giornata:'1',casa:'CYNTHIA 1920',ospite:'POLISPORTIVA CIAMPINO',campo:'BRUNO ABBATINI'},
-  {id:85,categoria:'UNDER19',data:'2026-06-21',ora:'19:00',girone:'FIN',giornata:'FIN',casa:'VINCENTE_SEM1',ospite:'VINCENTE_SEM2',campo:'BRUNO ABBATINI'}
-];
+const categorie = ['UNDER14','UNDER15','UNDER16','UNDER17','UNDER19'];
+const gironi = ['A','B'];
+const giornate = ['1','2','3','4','5','SEMIFINALE','FINALE'];
+const squadre = ['ACADEMY CYNTHIA GENZANO','ACCADEMIA CALCIO FRASCATI','ACCADEMIA TORRENOVA','ALBACYNTHIA','ALBALONGA','ARICCIA CALCIO','ATLETICO LARIANO','BARBATO FOOTBALL ACADEMY','COLLEFERRO CALCIO','CYNTHIA 1920','DREAMING FOOTBALL ACADEMY','F. A. G. GIANNINI','NEXT GEN LODIGIANI','POLISPORTIVA CIAMPINO','PRO CALCIO CECCHINA','REAL APRILIA','VJS VELLETRI'];
+const campi = ["CITTA' DELL'INFIORATA",'BRUNO ABBATINI'];
 const k='torneo_referti_2026';
 const qs=id=>document.getElementById(id);
+
+function fillSelect(id, values) { qs(id).innerHTML = values.map(v => `<option value="${v}">${v}</option>`).join(''); }
+function loadReferti(){ return JSON.parse(localStorage.getItem(k)||'[]'); }
+
 function init(){
-  const categorie=[...new Set(partite.map(p=>p.categoria))];
-  qs('categoria').innerHTML=categorie.map(c=>`<option>${c}</option>`).join('');
-  qs('categoria').addEventListener('change',refreshGare);
-  qs('gara').addEventListener('change',showGara);
+  fillSelect('categoria', categorie);
+  fillSelect('girone', gironi);
+  fillSelect('giornata', giornate);
+  fillSelect('squadraCasa', squadre);
+  fillSelect('squadraOspite', squadre);
+  fillSelect('campo', campi);
+
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  qs('dataGara').value = now.toISOString().slice(0,16);
+
   qs('salva').addEventListener('click',salvaReferto);
-  qs('nuovo').addEventListener('click',()=>['golCasa','golOspite','arbitro','ammCasa','ammOspite','espulsi','note'].forEach(x=>qs(x).value=x.includes('gol')?'0':''));
+  qs('nuovo').addEventListener('click',pulisciCampi);
   qs('exportJson').addEventListener('click',()=>download('referti_torneo_2026.json',JSON.stringify(loadReferti(),null,2),'application/json'));
   qs('exportCsv').addEventListener('click',exportCsv);
   qs('resetAll').addEventListener('click',()=>{if(confirm('Confermi cancellazione completa?')){localStorage.removeItem(k);renderReferti();}});
-  refreshGare(); renderReferti();
+  renderReferti();
 }
-function refreshGare(){
-  const cat=qs('categoria').value;
-  const gare=partite.filter(p=>p.categoria===cat).sort((a,b)=>a.id-b.id);
-  qs('gara').innerHTML=gare.map(g=>`<option value="${g.id}">${g.id} - ${g.casa} vs ${g.ospite}</option>`).join('');
-  showGara();
+
+function pulisciCampi(){
+  ['golCasa','golOspite','arbitro','ammCasa','ammOspite','espulsi','note'].forEach(x=>qs(x).value=x.includes('gol')?'0':'');
 }
-function showGara(){
-  const g=partite.find(p=>p.id===Number(qs('gara').value)); if(!g)return;
-  qs('campo').value=g.campo;
-  qs('garaInfo').textContent=`${g.data} ore ${g.ora} • Girone ${g.girone} • Giornata ${g.giornata}`;
-}
-function loadReferti(){ return JSON.parse(localStorage.getItem(k)||'[]'); }
+
 function salvaReferto(){
-  const garaId=Number(qs('gara').value); const g=partite.find(p=>p.id===garaId); if(!g) return;
-  const ref={
-    garaId,categoria:g.categoria,casa:g.casa,ospite:g.ospite,dataGara:g.data,ora:g.ora,
+  const casa = qs('squadraCasa').value;
+  const ospite = qs('squadraOspite').value;
+  if (casa === ospite) return alert('Squadra casa e ospite non possono coincidere.');
+
+  const all = loadReferti();
+  const ref = {
+    id: crypto.randomUUID(),
+    dataOra: qs('dataGara').value,
+    categoria: qs('categoria').value,
+    girone: qs('girone').value,
+    giornata: qs('giornata').value,
+    campo: qs('campo').value,
+    casa,
+    ospite,
     risultato:`${Number(qs('golCasa').value)}-${Number(qs('golOspite').value)}`,
     arbitro:qs('arbitro').value.trim(),
     ammonitiCasa:qs('ammCasa').value.split('\n').map(x=>x.trim()).filter(Boolean),
@@ -138,24 +136,30 @@ function salvaReferto(){
     note:qs('note').value.trim(),
     inseritoIl:new Date().toISOString()
   };
-  const all=loadReferti().filter(r=>r.garaId!==garaId); all.push(ref);
+
+  all.push(ref);
   localStorage.setItem(k,JSON.stringify(all));
-  renderReferti(); alert('Referto salvato correttamente.');
+  renderReferti();
+  alert('Referto salvato correttamente.');
 }
+
 function renderReferti(){
-  const rows=loadReferti().sort((a,b)=>a.garaId-b.garaId).map(r=>`<tr><td>${r.garaId}</td><td>${r.categoria}</td><td>${r.casa} - ${r.ospite}</td><td>${r.risultato}</td><td>${new Date(r.inseritoIl).toLocaleString('it-IT')}</td></tr>`).join('');
+  const rows=loadReferti().map(r=>`<tr><td>${r.id.slice(0,8)}</td><td>${r.categoria}</td><td>${r.casa} - ${r.ospite}<br><small>${r.dataOra} | ${r.girone} | ${r.giornata} | ${r.campo}</small></td><td>${r.risultato}</td><td>${new Date(r.inseritoIl).toLocaleString('it-IT')}</td></tr>`).join('');
   qs('tbody').innerHTML=rows||'<tr><td colspan="5">Nessun referto inserito.</td></tr>';
 }
+
 function exportCsv(){
   const all=loadReferti();
-  const head=['garaId','categoria','casa','ospite','dataGara','ora','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsi','note','inseritoIl'];
+  const head=['id','dataOra','categoria','girone','giornata','campo','casa','ospite','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsi','note','inseritoIl'];
   const lines=[head.join(';')].concat(all.map(r=>head.map(h=>`"${String(Array.isArray(r[h])?r[h].join('|'):r[h]??'').replaceAll('"','""')}"`).join(';')));
   download('referti_torneo_2026.csv',lines.join('\n'),'text/csv;charset=utf-8;');
 }
+
 function download(name,content,type){
   const blob=new Blob([content],{type});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
 }
+
 init();
 </script>
 </body>

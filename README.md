@@ -3,7 +3,7 @@
 Mini web app per la raccolta referti arbitri del **Torneo Città dell'Infiorata 2026**.
 
 ## Funzioni
-- Selezione gara per categoria.
+- Inserimento gara manuale con selettori: data/ora, categoria, girone, giornata, squadra casa, squadra ospite, campo.
 - Inserimento risultato, ammoniti, espulsi e note disciplinari.
 - Salvataggio locale sul dispositivo arbitro (LocalStorage).
 - Elenco referti compilati.
