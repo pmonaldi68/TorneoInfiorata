@@ -86,20 +86,21 @@ const campi = ["CITTA' DELL'INFIORATA",'BRUNO ABBATINI'];
 const k='torneo_referti_2026';
 const qs=id=>document.getElementById(id);
 
-function fillSelect(id, values) { qs(id).innerHTML = values.map(v => `<option value="${v}">${v}</option>`).join(''); }
+function fillSelect(id, values, placeholder) {
+  const first = `<option value="" selected disabled>${placeholder}</option>`;
+  qs(id).innerHTML = first + values.map(v => `<option value="${v}">${v}</option>`).join('');
+}
 function loadReferti(){ return JSON.parse(localStorage.getItem(k)||'[]'); }
 
 function init(){
-  fillSelect('categoria', categorie);
-  fillSelect('girone', gironi);
-  fillSelect('giornata', giornate);
-  fillSelect('squadraCasa', squadre);
-  fillSelect('squadraOspite', squadre);
-  fillSelect('campo', campi);
+  fillSelect('categoria', categorie, 'Seleziona categoria');
+  fillSelect('girone', gironi, 'Seleziona girone');
+  fillSelect('giornata', giornate, 'Seleziona giornata');
+  fillSelect('squadraCasa', squadre, 'Seleziona squadra casa');
+  fillSelect('squadraOspite', squadre, 'Seleziona squadra ospite');
+  fillSelect('campo', campi, 'Seleziona campo');
 
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  qs('dataGara').value = now.toISOString().slice(0,16);
+  qs('dataGara').value = '';
 
   qs('salva').addEventListener('click',salvaReferto);
   qs('nuovo').addEventListener('click',pulisciCampi);
@@ -116,6 +117,9 @@ function pulisciCampi(){
 function salvaReferto(){
   const casa = qs('squadraCasa').value;
   const ospite = qs('squadraOspite').value;
+  if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value) {
+    return alert('Compila tutti i campi della sezione Inserimento gara.');
+  }
   if (casa === ospite) return alert('Squadra casa e ospite non possono coincidere.');
 
   const all = loadReferti();
