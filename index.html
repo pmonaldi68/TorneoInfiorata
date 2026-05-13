@@ -13,6 +13,7 @@
     .grid-3 { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
     label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; }
     select, input, textarea, button { width: 100%; padding: 10px; border: 1px solid #c9d3e0; border-radius: 8px; box-sizing: border-box; }
+    input[type="text"], textarea { text-transform: uppercase; }
     textarea { min-height: 80px; }
     button { cursor: pointer; border: none; background: #2f67c7; color: white; font-weight: 600; }
     button.secondary { background: #4d5b6c; }
@@ -40,6 +41,7 @@
       <div><label for="squadraCasa">Squadra casa</label><select id="squadraCasa"></select></div>
       <div><label for="squadraOspite">Squadra ospite</label><select id="squadraOspite"></select></div>
       <div><label for="campo">Campo</label><select id="campo"></select></div>
+      <div><label for="arbitro">Arbitro</label><input id="arbitro" type="text" placeholder="NOME ARBITRO" /></div>
     </div>
   </div>
 
@@ -48,8 +50,7 @@
     <div class="grid grid-3">
       <div><label>Gol casa</label><input id="golCasa" type="number" min="0" value="0" /></div>
       <div><label>Gol ospite</label><input id="golOspite" type="number" min="0" value="0" /></div>
-      <div><label>Arbitro</label><input id="arbitro" placeholder="Nome arbitro" /></div>
-    </div>
+          </div>
     <div class="grid grid-3">
       <div><label>Ammoniti casa (uno per riga)</label><textarea id="ammCasa"></textarea></div>
       <div><label>Ammoniti ospite (uno per riga)</label><textarea id="ammOspite"></textarea></div>
@@ -79,7 +80,7 @@
 </div>
 <script>
 const categorie = ['UNDER14','UNDER15','UNDER16','UNDER17','UNDER19'];
-const gironi = ['A','B'];
+const gironi = ['A','B','SEMIFINALE','FINALE'];
 const giornate = ['1','2','3','4','5','SEMIFINALE','FINALE'];
 const squadre = ['ACADEMY CYNTHIA GENZANO','ACCADEMIA CALCIO FRASCATI','ACCADEMIA TORRENOVA','ALBACYNTHIA','ALBALONGA','ARICCIA CALCIO','ATLETICO LARIANO','BARBATO FOOTBALL ACADEMY','COLLEFERRO CALCIO','CYNTHIA 1920','DREAMING FOOTBALL ACADEMY','F. A. G. GIANNINI','NEXT GEN LODIGIANI','POLISPORTIVA CIAMPINO','PRO CALCIO CECCHINA','REAL APRILIA','VJS VELLETRI'];
 const campi = ["CITTA' DELL'INFIORATA",'BRUNO ABBATINI'];
@@ -102,6 +103,7 @@ function init(){
 
   qs('dataGara').value = '';
 
+  document.querySelectorAll('input[type="text"], textarea').forEach(el => el.addEventListener('input', () => { el.value = el.value.toUpperCase(); }));
   qs('salva').addEventListener('click',salvaReferto);
   qs('nuovo').addEventListener('click',pulisciCampi);
   qs('exportJson').addEventListener('click',()=>download('referti_torneo_2026.json',JSON.stringify(loadReferti(),null,2),'application/json'));
@@ -117,8 +119,8 @@ function pulisciCampi(){
 function salvaReferto(){
   const casa = qs('squadraCasa').value;
   const ospite = qs('squadraOspite').value;
-  if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value) {
-    return alert('Compila tutti i campi della sezione Inserimento gara.');
+  if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value || !qs('arbitro').value.trim() || qs('golCasa').value === '' || qs('golOspite').value === '' || !qs('ammCasa').value.trim() || !qs('ammOspite').value.trim() || !qs('espulsi').value.trim() || !qs('note').value.trim()) {
+    return alert('Compila tutti i campi del referto prima di salvare.');
   }
   if (casa === ospite) return alert('Squadra casa e ospite non possono coincidere.');
 
@@ -133,11 +135,11 @@ function salvaReferto(){
     casa,
     ospite,
     risultato:`${Number(qs('golCasa').value)}-${Number(qs('golOspite').value)}`,
-    arbitro:qs('arbitro').value.trim(),
-    ammonitiCasa:qs('ammCasa').value.split('\n').map(x=>x.trim()).filter(Boolean),
-    ammonitiOspite:qs('ammOspite').value.split('\n').map(x=>x.trim()).filter(Boolean),
-    espulsi:qs('espulsi').value.split('\n').map(x=>x.trim()).filter(Boolean),
-    note:qs('note').value.trim(),
+    arbitro:qs('arbitro').value.trim().toUpperCase(),
+    ammonitiCasa:qs('ammCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    ammonitiOspite:qs('ammOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsi:qs('espulsi').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    note:qs('note').value.trim().toUpperCase(),
     inseritoIl:new Date().toISOString()
   };
 
