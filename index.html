@@ -50,23 +50,27 @@
 
   <div class="card">
     <h3>2) Inserimento referto</h3>
-    <div class="grid grid-3">
-      <div><label>Gol casa</label><input class="score-input" id="golCasa" type="number" min="0" value="0" /></div>
-      <div><label>Gol ospite</label><input class="score-input" id="golOspite" type="number" min="0" value="0" /></div>
-          </div>
-    <div class="grid grid-3">
-      <div><label>Ammoniti casa (uno per riga)</label><textarea id="ammCasa"></textarea></div>
-      <div><label>Ammoniti ospite (uno per riga)</label><textarea id="ammOspite"></textarea></div>
+    <div class="grid" style="grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap:16px;">
       <div>
+        <h4 style="margin:0 0 8px 0;">Squadra casa</h4>
+        <label>Gol casa</label>
+        <input class="score-input" id="golCasa" type="number" min="0" value="0" />
+        <label style="margin-top:8px;">Ammoniti casa (uno per riga)</label>
+        <textarea id="ammCasa"></textarea>
         <label><input id="noAmmonitiCasa" type="checkbox" /> Nessun ammonito casa</label>
-        <label><input id="noAmmonitiOspite" type="checkbox" /> Nessun ammonito ospite</label>
-      </div>
-    </div>
-    <div class="grid grid-3">
-      <div><label>Espulsi casa (uno per riga)</label><textarea id="espulsiCasa"></textarea></div>
-      <div><label>Espulsi ospite (uno per riga)</label><textarea id="espulsiOspite"></textarea></div>
-      <div>
+        <label style="margin-top:8px;">Espulsi casa (uno per riga)</label>
+        <textarea id="espulsiCasa"></textarea>
         <label><input id="noEspulsiCasa" type="checkbox" /> Nessun espulso casa</label>
+      </div>
+      <div>
+        <h4 style="margin:0 0 8px 0;">Squadra ospite</h4>
+        <label>Gol ospite</label>
+        <input class="score-input" id="golOspite" type="number" min="0" value="0" />
+        <label style="margin-top:8px;">Ammoniti ospite (uno per riga)</label>
+        <textarea id="ammOspite"></textarea>
+        <label><input id="noAmmonitiOspite" type="checkbox" /> Nessun ammonito ospite</label>
+        <label style="margin-top:8px;">Espulsi ospite (uno per riga)</label>
+        <textarea id="espulsiOspite"></textarea>
         <label><input id="noEspulsiOspite" type="checkbox" /> Nessun espulso ospite</label>
       </div>
     </div>
