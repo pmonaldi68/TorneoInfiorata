@@ -101,7 +101,7 @@
     </div>
     <div class="result-list" style="margin-top:12px;">
       <table>
-        <thead><tr><th>ID</th><th>Categoria</th><th>Gara</th><th>Risultato</th><th>Data inserimento</th></tr></thead>
+        <thead><tr><th>ID</th><th>Categoria</th><th>Gara</th><th>Risultato</th><th>Data inserimento</th><th>Azione</th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -203,9 +203,16 @@ function salvaReferto(){
 }
 
 function renderReferti(){
-  const rows=loadReferti().map(r=>`<tr><td>${r.id.slice(0,8)}</td><td>${r.categoria}</td><td>${r.casa} - ${r.ospite}<br><small>${r.dataOra} | ${r.girone} | ${r.giornata} | ${r.campo}</small></td><td>${r.risultato}</td><td>${new Date(r.inseritoIl).toLocaleString('it-IT')}</td></tr>`).join('');
-  qs('tbody').innerHTML=rows||'<tr><td colspan="5">Nessun referto inserito.</td></tr>';
+  const rows=loadReferti().map(r=>`<tr><td>${r.id.slice(0,8)}</td><td>${r.categoria}</td><td>${r.casa} - ${r.ospite}<br><small>${r.dataOra} | ${r.girone} | ${r.giornata} | ${r.campo}</small></td><td>${r.risultato}</td><td>${new Date(r.inseritoIl).toLocaleString('it-IT')}</td><td><button class="warn" onclick="cancellaRefertoSingolo('${r.id}')">Cancella</button></td></tr>`).join('');
+  qs('tbody').innerHTML=rows||'<tr><td colspan="6">Nessun referto inserito.</td></tr>';
   refreshSavedRefertiSelect();
+}
+
+function cancellaRefertoSingolo(id){
+  if (!confirm('Confermi cancellazione di questo referto?')) return;
+  const updated = loadReferti().filter(r => r.id !== id);
+  localStorage.setItem(k, JSON.stringify(updated));
+  renderReferti();
 }
 
 function refreshSavedRefertiSelect(){
