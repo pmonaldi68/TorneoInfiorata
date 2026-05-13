@@ -8,11 +8,11 @@
     :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
     body { margin: 0; background: #bfe6ff; color: #1c2430; }
     .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
-    .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+    .card { background: #f7fbff; border: 1px solid #9fcaf0; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
     .grid { display: grid; gap: 12px; }
     .grid-3 { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
     label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; }
-    select, input, textarea, button { width: 100%; padding: 10px; border: 1px solid #c9d3e0; border-radius: 8px; box-sizing: border-box; }
+    select, input, textarea, button { width: 100%; padding: 10px; border: 1px solid #8fb8de; border-radius: 8px; box-sizing: border-box; background: #ffffff; }
     input[type="text"], textarea { text-transform: uppercase; }
     textarea { min-height: 80px; }
     button { cursor: pointer; border: none; background: #2f67c7; color: white; font-weight: 600; }
@@ -31,6 +31,8 @@
     .exp-label { background: #ff6b6b; color: #fff; padding: 2px 6px; border-radius: 6px; display: inline-block; }
     .team-col { display: flex; flex-direction: column; gap: 8px; }
     .field-block { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+    .field-block textarea, .field-block input, .field-block select { background: #eef7ff; }
+    .field-block input:focus, .field-block textarea:focus, select:focus, input:focus, textarea:focus { outline: 2px solid #2f67c7; outline-offset: 1px; }
   </style>
 </head>
 <body>
