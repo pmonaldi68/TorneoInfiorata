@@ -264,42 +264,67 @@ function buildExportBaseName(ref){
 
 function exportJsonSingolo(){
   const ref = getRefertoPerExport(); if(!ref) return;
-  download(`${buildExportBaseName(ref)}.json`, JSON.stringify(ref, null, 2), 'application/json');
+  const payload = buildExportPayload(ref);
+  download(`${buildExportBaseName(ref)}.json`, JSON.stringify(payload, null, 2), 'application/json');
 }
 
 function exportCsvSingolo(){
   const ref = getRefertoPerExport(); if(!ref) return;
-  const head=['id','dataOra','categoria','girone','giornata','campo','casa','ospite','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsiCasa','espulsiOspite','nessunAmmonitoCasa','nessunAmmonitoOspite','nessunEspulsoCasa','nessunEspulsoOspite','note','inseritoIl'];
-  const line=head.map(h=>`"${String(Array.isArray(ref[h])?ref[h].join('|'):ref[h]??'').replaceAll('"','""')}"`).join(';');
+  const payload = buildExportPayload(ref);
+  const head=['id','dataOra','categoria','girone','giornata','campo','squadraCasa','squadraOspite','risultato','arbitro','ammonitiSquadraCasa','ammonitiSquadraOspite','espulsiSquadraCasa','espulsiSquadraOspite','note','inseritoIl'];
+  const line=head.map(h=>`"${String(Array.isArray(payload[h])?payload[h].join('|'):payload[h]??'').replaceAll('"','""')}"`).join(';');
   download(`${buildExportBaseName(ref)}.csv`,head.join(';')+'\n'+line,'text/csv;charset=utf-8;');
 }
 
 
 function exportPdfSingolo(){
   const r = getRefertoPerExport(); if(!r) return;
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${buildExportBaseName(r)}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;}h2{margin-top:0;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;vertical-align:top;} .blk{margin:10px 0;}</style></head><body><h2>Referto Gara - Torneo Città dell'Infiorata 2026</h2><div class="blk"><b>Categoria:</b> ${r.categoria} | <b>Girone:</b> ${r.girone} | <b>Giornata:</b> ${r.giornata}<br><b>Data/Ora:</b> ${r.dataOra} | <b>Campo:</b> ${r.campo}<br><b>Gara:</b> ${r.casa} - ${r.ospite} | <b>Risultato:</b> ${r.risultato}<br><b>Arbitro:</b> ${r.arbitro}</div><table><tr><th>Ammoniti Casa</th><th>Ammoniti Ospite</th></tr><tr><td>${r.nessunAmmonitoCasa?'NESSUNO':(r.ammonitiCasa||[]).join('<br>')}</td><td>${r.nessunAmmonitoOspite?'NESSUNO':(r.ammonitiOspite||[]).join('<br>')}</td></tr><tr><th>Espulsi Casa</th><th>Espulsi Ospite</th></tr><tr><td>${r.nessunEspulsoCasa?'NESSUNO':(r.espulsiCasa||[]).join('<br>')}</td><td>${r.nessunEspulsoOspite?'NESSUNO':(r.espulsiOspite||[]).join('<br>')}</td></tr></table><div class="blk"><b>Note:</b><br>${r.note||''}</div></body></html>`;
+  const payload = buildExportPayload(r);
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${buildExportBaseName(r)}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;}h2{margin-top:0;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;vertical-align:top;} .blk{margin:10px 0;}</style></head><body><h2>Referto Gara - Torneo Città dell'Infiorata 2026</h2><div class="blk"><b>Categoria:</b> ${payload.categoria} | <b>Girone:</b> ${payload.girone} | <b>Giornata:</b> ${payload.giornata}<br><b>Data/Ora:</b> ${payload.dataOra} | <b>Campo:</b> ${payload.campo}<br><b>Gara:</b> ${payload.squadraCasa} - ${payload.squadraOspite} | <b>Risultato:</b> ${payload.risultato}<br><b>Arbitro:</b> ${payload.arbitro}</div><table><tr><th>Ammoniti ${payload.squadraCasa}</th><th>Ammoniti ${payload.squadraOspite}</th></tr><tr><td>${payload.ammonitiSquadraCasa.join('<br>') || 'NESSUNO'}</td><td>${payload.ammonitiSquadraOspite.join('<br>') || 'NESSUNO'}</td></tr><tr><th>Espulsi ${payload.squadraCasa}</th><th>Espulsi ${payload.squadraOspite}</th></tr><tr><td>${payload.espulsiSquadraCasa.join('<br>') || 'NESSUNO'}</td><td>${payload.espulsiSquadraOspite.join('<br>') || 'NESSUNO'}</td></tr></table><div class="blk"><b>Note:</b><br>${payload.note||''}</div></body></html>`;
   const w = window.open('', '_blank');
   w.document.write(html); w.document.close(); w.focus(); w.print();
 }
 
+function buildExportPayload(ref){
+  return {
+    id: ref.id,
+    dataOra: ref.dataOra,
+    categoria: ref.categoria,
+    girone: ref.girone,
+    giornata: ref.giornata,
+    campo: ref.campo,
+    squadraCasa: ref.casa,
+    squadraOspite: ref.ospite,
+    risultato: ref.risultato,
+    arbitro: ref.arbitro,
+    ammonitiSquadraCasa: ref.nessunAmmonitoCasa ? [] : (ref.ammonitiCasa || []),
+    ammonitiSquadraOspite: ref.nessunAmmonitoOspite ? [] : (ref.ammonitiOspite || []),
+    espulsiSquadraCasa: ref.nessunEspulsoCasa ? [] : (ref.espulsiCasa || []),
+    espulsiSquadraOspite: ref.nessunEspulsoOspite ? [] : (ref.espulsiOspite || []),
+    note: ref.note || '',
+    inseritoIl: ref.inseritoIl
+  };
+}
+
 function creaTestoCondivisione(ref){
-  const ammCasa = ref.nessunAmmonitoCasa ? 'NESSUNO' : (ref.ammonitiCasa||[]).join(', ') || 'NESSUNO';
-  const ammOspite = ref.nessunAmmonitoOspite ? 'NESSUNO' : (ref.ammonitiOspite||[]).join(', ') || 'NESSUNO';
-  const espCasa = ref.nessunEspulsoCasa ? 'NESSUNO' : (ref.espulsiCasa||[]).join(', ') || 'NESSUNO';
-  const espOspite = ref.nessunEspulsoOspite ? 'NESSUNO' : (ref.espulsiOspite||[]).join(', ') || 'NESSUNO';
+  const payload = buildExportPayload(ref);
+  const ammCasa = payload.ammonitiSquadraCasa.join(', ') || 'NESSUNO';
+  const ammOspite = payload.ammonitiSquadraOspite.join(', ') || 'NESSUNO';
+  const espCasa = payload.espulsiSquadraCasa.join(', ') || 'NESSUNO';
+  const espOspite = payload.espulsiSquadraOspite.join(', ') || 'NESSUNO';
   return `TORNEO CITTA DELL'INFIORATA 2026
 REF: ${ref.id}
-DATA/ORA: ${ref.dataOra}
-CATEGORIA: ${ref.categoria} | GIRONE: ${ref.girone} | GIORNATA: ${ref.giornata}
-CAMPO: ${ref.campo}
-GARA: ${ref.casa} - ${ref.ospite}
-RISULTATO: ${ref.risultato}
-ARBITRO: ${ref.arbitro}
-AMMONITI CASA: ${ammCasa}
-AMMONITI OSPITE: ${ammOspite}
-ESPULSI CASA: ${espCasa}
-ESPULSI OSPITE: ${espOspite}
-NOTE: ${ref.note || '-'}`;
+DATA/ORA: ${payload.dataOra}
+CATEGORIA: ${payload.categoria} | GIRONE: ${payload.girone} | GIORNATA: ${payload.giornata}
+CAMPO: ${payload.campo}
+GARA: ${payload.squadraCasa} - ${payload.squadraOspite}
+RISULTATO: ${payload.risultato}
+ARBITRO: ${payload.arbitro}
+AMMONITI ${payload.squadraCasa}: ${ammCasa}
+AMMONITI ${payload.squadraOspite}: ${ammOspite}
+ESPULSI ${payload.squadraCasa}: ${espCasa}
+ESPULSI ${payload.squadraOspite}: ${espOspite}
+NOTE: ${payload.note || '-'}`;
 }
 
 async function condivisioneRapida(){
