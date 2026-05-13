@@ -24,6 +24,9 @@
     .result-list { max-height: 280px; overflow:auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th, td { border-bottom: 1px solid #e6ebf3; padding: 8px; text-align: left; }
+    .score-input { max-width: 90px; }
+    .checkline { display:flex; align-items:center; gap:8px; margin-top:6px; }
+    .checkline input { width:auto; }
   </style>
 </head>
 <body>
@@ -48,13 +51,22 @@
   <div class="card">
     <h3>2) Inserimento referto</h3>
     <div class="grid grid-3">
-      <div><label>Gol casa</label><input id="golCasa" type="number" min="0" value="0" /></div>
-      <div><label>Gol ospite</label><input id="golOspite" type="number" min="0" value="0" /></div>
+      <div><label>Gol casa</label><input class="score-input" id="golCasa" type="number" min="0" value="0" /></div>
+      <div><label>Gol ospite</label><input class="score-input" id="golOspite" type="number" min="0" value="0" /></div>
           </div>
     <div class="grid grid-3">
       <div><label>Ammoniti casa (uno per riga)</label><textarea id="ammCasa"></textarea></div>
       <div><label>Ammoniti ospite (uno per riga)</label><textarea id="ammOspite"></textarea></div>
-      <div><label>Espulsi (indicare squadra)</label><textarea id="espulsi"></textarea></div>
+      <div>
+        <label><input id="noAmmoniti" type="checkbox" /> Nessun ammonito</label>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div><label>Espulsi casa (uno per riga)</label><textarea id="espulsiCasa"></textarea></div>
+      <div><label>Espulsi ospite (uno per riga)</label><textarea id="espulsiOspite"></textarea></div>
+      <div>
+        <label><input id="noEspulsi" type="checkbox" /> Nessun espulso</label>
+      </div>
     </div>
     <div><label>Note disciplinari / gara</label><textarea id="note"></textarea></div>
     <div class="row" style="margin-top:12px;">
@@ -113,14 +125,27 @@ function init(){
 }
 
 function pulisciCampi(){
-  ['golCasa','golOspite','arbitro','ammCasa','ammOspite','espulsi','note'].forEach(x=>qs(x).value=x.includes('gol')?'0':'');
+  ['golCasa','golOspite','arbitro','ammCasa','ammOspite','espulsiCasa','espulsiOspite','note'].forEach(x=>qs(x).value=x.includes('gol')?'0':'');
+  qs('noAmmoniti').checked = false;
+  qs('noEspulsi').checked = false;
 }
 
 function salvaReferto(){
   const casa = qs('squadraCasa').value;
   const ospite = qs('squadraOspite').value;
-  if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value || !qs('arbitro').value.trim() || qs('golCasa').value === '' || qs('golOspite').value === '' || !qs('ammCasa').value.trim() || !qs('ammOspite').value.trim() || !qs('espulsi').value.trim() || !qs('note').value.trim()) {
-    return alert('Compila tutti i campi del referto prima di salvare.');
+  const noAmmoniti = qs('noAmmoniti').checked;
+  const noEspulsi = qs('noEspulsi').checked;
+  const ammCompilati = qs('ammCasa').value.trim() || qs('ammOspite').value.trim();
+  const espCompilati = qs('espulsiCasa').value.trim() || qs('espulsiOspite').value.trim();
+
+  if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value || !qs('arbitro').value.trim() || qs('golCasa').value === '' || qs('golOspite').value === '' || !qs('note').value.trim()) {
+    return alert('Compila tutti i campi principali del referto prima di salvare.');
+  }
+  if (!noAmmoniti && !ammCompilati) {
+    return alert('Inserisci almeno un ammonito o spunta Nessun ammonito.');
+  }
+  if (!noEspulsi && !espCompilati) {
+    return alert('Inserisci almeno un espulso o spunta Nessun espulso.');
   }
   if (casa === ospite) return alert('Squadra casa e ospite non possono coincidere.');
 
@@ -136,9 +161,12 @@ function salvaReferto(){
     ospite,
     risultato:`${Number(qs('golCasa').value)}-${Number(qs('golOspite').value)}`,
     arbitro:qs('arbitro').value.trim().toUpperCase(),
-    ammonitiCasa:qs('ammCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
-    ammonitiOspite:qs('ammOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
-    espulsi:qs('espulsi').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    ammonitiCasa:noAmmoniti ? [] : qs('ammCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    ammonitiOspite:noAmmoniti ? [] : qs('ammOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiCasa:noEspulsi ? [] : qs('espulsiCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiOspite:noEspulsi ? [] : qs('espulsiOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    nessunAmmonito:noAmmoniti,
+    nessunEspulso:noEspulsi,
     note:qs('note').value.trim().toUpperCase(),
     inseritoIl:new Date().toISOString()
   };
@@ -156,7 +184,7 @@ function renderReferti(){
 
 function exportCsv(){
   const all=loadReferti();
-  const head=['id','dataOra','categoria','girone','giornata','campo','casa','ospite','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsi','note','inseritoIl'];
+  const head=['id','dataOra','categoria','girone','giornata','campo','casa','ospite','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsiCasa','espulsiOspite','nessunAmmonito','nessunEspulso','note','inseritoIl'];
   const lines=[head.join(';')].concat(all.map(r=>head.map(h=>`"${String(Array.isArray(r[h])?r[h].join('|'):r[h]??'').replaceAll('"','""')}"`).join(';')));
   download('referti_torneo_2026.csv',lines.join('\n'),'text/csv;charset=utf-8;');
 }
