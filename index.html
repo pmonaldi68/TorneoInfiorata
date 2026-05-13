@@ -58,14 +58,16 @@
       <div><label>Ammoniti casa (uno per riga)</label><textarea id="ammCasa"></textarea></div>
       <div><label>Ammoniti ospite (uno per riga)</label><textarea id="ammOspite"></textarea></div>
       <div>
-        <label><input id="noAmmoniti" type="checkbox" /> Nessun ammonito</label>
+        <label><input id="noAmmonitiCasa" type="checkbox" /> Nessun ammonito casa</label>
+        <label><input id="noAmmonitiOspite" type="checkbox" /> Nessun ammonito ospite</label>
       </div>
     </div>
     <div class="grid grid-3">
       <div><label>Espulsi casa (uno per riga)</label><textarea id="espulsiCasa"></textarea></div>
       <div><label>Espulsi ospite (uno per riga)</label><textarea id="espulsiOspite"></textarea></div>
       <div>
-        <label><input id="noEspulsi" type="checkbox" /> Nessun espulso</label>
+        <label><input id="noEspulsiCasa" type="checkbox" /> Nessun espulso casa</label>
+        <label><input id="noEspulsiOspite" type="checkbox" /> Nessun espulso ospite</label>
       </div>
     </div>
     <div><label>Note disciplinari / gara</label><textarea id="note"></textarea></div>
@@ -80,6 +82,7 @@
     <div class="row">
       <button class="secondary" id="exportJson">Esporta JSON</button>
       <button class="secondary" id="exportCsv">Esporta CSV</button>
+      <button class="secondary" id="exportPdf">Esporta PDF</button>
       <button class="warn" id="resetAll">Cancella tutti i referti</button>
     </div>
     <div class="result-list" style="margin-top:12px;">
@@ -120,33 +123,38 @@ function init(){
   qs('nuovo').addEventListener('click',pulisciCampi);
   qs('exportJson').addEventListener('click',()=>download('referti_torneo_2026.json',JSON.stringify(loadReferti(),null,2),'application/json'));
   qs('exportCsv').addEventListener('click',exportCsv);
+  qs('exportPdf').addEventListener('click',exportPdf);
   qs('resetAll').addEventListener('click',()=>{if(confirm('Confermi cancellazione completa?')){localStorage.removeItem(k);renderReferti();}});
   renderReferti();
 }
 
 function pulisciCampi(){
   ['golCasa','golOspite','arbitro','ammCasa','ammOspite','espulsiCasa','espulsiOspite','note'].forEach(x=>qs(x).value=x.includes('gol')?'0':'');
-  qs('noAmmoniti').checked = false;
-  qs('noEspulsi').checked = false;
+  qs('noAmmonitiCasa').checked = false;
+  qs('noAmmonitiOspite').checked = false;
+  qs('noEspulsiCasa').checked = false;
+  qs('noEspulsiOspite').checked = false;
 }
 
 function salvaReferto(){
   const casa = qs('squadraCasa').value;
   const ospite = qs('squadraOspite').value;
-  const noAmmoniti = qs('noAmmoniti').checked;
-  const noEspulsi = qs('noEspulsi').checked;
-  const ammCompilati = qs('ammCasa').value.trim() || qs('ammOspite').value.trim();
-  const espCompilati = qs('espulsiCasa').value.trim() || qs('espulsiOspite').value.trim();
+  const noAmmonitiCasa = qs('noAmmonitiCasa').checked;
+  const noAmmonitiOspite = qs('noAmmonitiOspite').checked;
+  const noEspulsiCasa = qs('noEspulsiCasa').checked;
+  const noEspulsiOspite = qs('noEspulsiOspite').checked;
+  const ammCasaCompilati = qs('ammCasa').value.trim();
+  const ammOspiteCompilati = qs('ammOspite').value.trim();
+  const espCasaCompilati = qs('espulsiCasa').value.trim();
+  const espOspiteCompilati = qs('espulsiOspite').value.trim();
 
   if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value || !qs('arbitro').value.trim() || qs('golCasa').value === '' || qs('golOspite').value === '' || !qs('note').value.trim()) {
     return alert('Compila tutti i campi principali del referto prima di salvare.');
   }
-  if (!noAmmoniti && !ammCompilati) {
-    return alert('Inserisci almeno un ammonito o spunta Nessun ammonito.');
-  }
-  if (!noEspulsi && !espCompilati) {
-    return alert('Inserisci almeno un espulso o spunta Nessun espulso.');
-  }
+  if (!noAmmonitiCasa && !ammCasaCompilati) return alert('Inserisci ammoniti casa o spunta Nessun ammonito casa.');
+  if (!noAmmonitiOspite && !ammOspiteCompilati) return alert('Inserisci ammoniti ospite o spunta Nessun ammonito ospite.');
+  if (!noEspulsiCasa && !espCasaCompilati) return alert('Inserisci espulsi casa o spunta Nessun espulso casa.');
+  if (!noEspulsiOspite && !espOspiteCompilati) return alert('Inserisci espulsi ospite o spunta Nessun espulso ospite.');
   if (casa === ospite) return alert('Squadra casa e ospite non possono coincidere.');
 
   const all = loadReferti();
@@ -161,12 +169,14 @@ function salvaReferto(){
     ospite,
     risultato:`${Number(qs('golCasa').value)}-${Number(qs('golOspite').value)}`,
     arbitro:qs('arbitro').value.trim().toUpperCase(),
-    ammonitiCasa:noAmmoniti ? [] : qs('ammCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
-    ammonitiOspite:noAmmoniti ? [] : qs('ammOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
-    espulsiCasa:noEspulsi ? [] : qs('espulsiCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
-    espulsiOspite:noEspulsi ? [] : qs('espulsiOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
-    nessunAmmonito:noAmmoniti,
-    nessunEspulso:noEspulsi,
+    ammonitiCasa:noAmmonitiCasa ? [] : qs('ammCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    ammonitiOspite:noAmmonitiOspite ? [] : qs('ammOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiCasa:noEspulsiCasa ? [] : qs('espulsiCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiOspite:noEspulsiOspite ? [] : qs('espulsiOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    nessunAmmonitoCasa:noAmmonitiCasa,
+    nessunAmmonitoOspite:noAmmonitiOspite,
+    nessunEspulsoCasa:noEspulsiCasa,
+    nessunEspulsoOspite:noEspulsiOspite,
     note:qs('note').value.trim().toUpperCase(),
     inseritoIl:new Date().toISOString()
   };
@@ -184,9 +194,21 @@ function renderReferti(){
 
 function exportCsv(){
   const all=loadReferti();
-  const head=['id','dataOra','categoria','girone','giornata','campo','casa','ospite','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsiCasa','espulsiOspite','nessunAmmonito','nessunEspulso','note','inseritoIl'];
+  const head=['id','dataOra','categoria','girone','giornata','campo','casa','ospite','risultato','arbitro','ammonitiCasa','ammonitiOspite','espulsiCasa','espulsiOspite','nessunAmmonitoCasa','nessunAmmonitoOspite','nessunEspulsoCasa','nessunEspulsoOspite','note','inseritoIl'];
   const lines=[head.join(';')].concat(all.map(r=>head.map(h=>`"${String(Array.isArray(r[h])?r[h].join('|'):r[h]??'').replaceAll('"','""')}"`).join(';')));
   download('referti_torneo_2026.csv',lines.join('\n'),'text/csv;charset=utf-8;');
+}
+
+
+function exportPdf(){
+  const rows = loadReferti();
+  if (!rows.length) return alert('Nessun referto da esportare.');
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Referti Torneo 2026</title><style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #999;padding:6px;text-align:left;}h2{margin-top:0;}</style></head><body><h2>Referti Torneo Città dell'Infiorata 2026</h2><table><thead><tr><th>ID</th><th>Data/Ora</th><th>Categoria</th><th>Gara</th><th>Ris.</th><th>Arbitro</th><th>Note</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.id.slice(0,8)}</td><td>${r.dataOra}</td><td>${r.categoria}</td><td>${r.casa} - ${r.ospite}</td><td>${r.risultato}</td><td>${r.arbitro}</td><td>${r.note}</td></tr>`).join('')}</tbody></table></body></html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  w.print();
 }
 
 function download(name,content,type){
