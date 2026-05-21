@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inserimento Referti Arbitrali - Torneo Città dell'Infiorata 2026</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { margin: 0; background: #bfe6ff; color: #1c2430; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .card { background: #f7fbff; border: 1px solid #9fcaf0; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+    .grid { display: grid; gap: 12px; }
+    .grid-3 { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
+    label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; }
+    select, input, textarea, button { width: 100%; padding: 10px; border: 1px solid #8fb8de; border-radius: 8px; box-sizing: border-box; background: #ffffff; }
+    input[type="text"], textarea { text-transform: uppercase; }
+    textarea { min-height: 80px; }
+    button { cursor: pointer; border: none; background: #2f67c7; color: white; font-weight: 600; }
+    button.secondary { background: #4d5b6c; }
+    button.warn { background: #b03737; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row > button { flex: 1; min-width: 180px; }
+    .muted { color: #5d6875; font-size: 14px; }
+    .result-list { max-height: 280px; overflow:auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border-bottom: 1px solid #e6ebf3; padding: 8px; text-align: left; }
+    .score-input { max-width: 90px; }
+    .checkline { display:flex; align-items:center; gap:8px; margin-top:6px; }
+    .checkline input { width:auto; }
+    .amm-label { background: #ffe66b; padding: 2px 6px; border-radius: 6px; display: inline-block; }
+    .exp-label { background: #ff6b6b; color: #fff; padding: 2px 6px; border-radius: 6px; display: inline-block; }
+    .team-col { display: flex; flex-direction: column; gap: 8px; }
+    .field-block { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+    .field-block textarea, .field-block input, .field-block select { background: #eef7ff; }
+    .field-block input:focus, .field-block textarea:focus, select:focus, input:focus, textarea:focus { outline: 2px solid #2f67c7; outline-offset: 1px; }
+    .inline-check { display: inline-flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Inserimento Referti Arbitrali - Torneo Città dell'Infiorata 2026</h1>
+  <p class="muted">Periodo torneo: dal 29 maggio 2026 al 21 giugno 2026 (Genzano di Roma).</p>
+
+  <div class="card">
+    <h3>1) Inserimento gara</h3>
+    <div class="grid grid-3">
+      <div><label for="dataGara">Data e ora</label><input id="dataGara" type="datetime-local" /></div>
+      <div><label for="categoria">Categoria</label><select id="categoria"></select></div>
+      <div><label for="girone">Girone</label><select id="girone"></select></div>
+      <div><label for="giornata">Giornata</label><select id="giornata"></select></div>
+      <div><label for="squadraCasa">Squadra casa</label><select id="squadraCasa"></select></div>
+      <div><label for="squadraOspite">Squadra ospite</label><select id="squadraOspite"></select></div>
+      <div><label for="campo">Campo</label><select id="campo"></select></div>
+      <div><label for="arbitro">Arbitro</label><input id="arbitro" type="text" placeholder="NOME ARBITRO" /></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2) Inserimento referto</h3>
+    <div class="grid" style="grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap:16px;">
+      <div class="team-col">
+        <h4 style="margin:0 0 8px 0;">Squadra casa</h4>
+        <div class="field-block">
+          <label>Gol casa</label>
+          <input class="score-input" id="golCasa" type="number" min="0" value="0" />
+        </div>
+        <div class="field-block">
+          <label class="amm-label">Ammoniti casa (uno per riga)</label>
+          <textarea id="ammCasa"></textarea>
+          <label class="amm-label inline-check">Nessun ammonito casa <input id="noAmmonitiCasa" type="checkbox" /></label>
+        </div>
+        <div class="field-block">
+          <label class="exp-label">Espulsi casa (uno per riga)</label>
+          <textarea id="espulsiCasa"></textarea>
+          <label class="exp-label inline-check">Nessun espulso casa <input id="noEspulsiCasa" type="checkbox" /></label>
+        </div>
+      </div>
+      <div class="team-col">
+        <h4 style="margin:0 0 8px 0;">Squadra ospite</h4>
+        <div class="field-block">
+          <label>Gol ospite</label>
+          <input class="score-input" id="golOspite" type="number" min="0" value="0" />
+        </div>
+        <div class="field-block">
+          <label class="amm-label">Ammoniti ospite (uno per riga)</label>
+          <textarea id="ammOspite"></textarea>
+          <label class="amm-label inline-check">Nessun ammonito ospite <input id="noAmmonitiOspite" type="checkbox" /></label>
+        </div>
+        <div class="field-block">
+          <label class="exp-label">Espulsi ospite (uno per riga)</label>
+          <textarea id="espulsiOspite"></textarea>
+          <label class="exp-label inline-check">Nessun espulso ospite <input id="noEspulsiOspite" type="checkbox" /></label>
+        </div>
+      </div>
+    </div>
+    <div>
+      <label>Note disciplinari / gara</label>
+      <textarea id="note"></textarea>
+      <label class="inline-check">Nessuna nota disciplinare / gara <input id="noNote" type="checkbox" /></label>
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <button id="salva">Salva referto</button>
+      <button class="secondary" id="nuovo">Pulisci campi</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>3) Referti inseriti</h3>
+    <div class="grid grid-3" style="margin-bottom:10px;">
+      <div>
+        <label for="exportMode">Esporta</label>
+        <select id="exportMode">
+          <option value="current">Gara attualmente inserita</option>
+          <option value="saved">Gara salvata (seleziona sotto)</option>
+        </select>
+      </div>
+      <div>
+        <label for="savedReferto">Gara salvata</label>
+        <select id="savedReferto"></select>
+      </div>
+    </div>
+    <div class="row">
+      <button class="secondary" id="exportPdf">Esporta PDF</button>
+      <button class="secondary" id="shareQuick">Condivisione rapida</button>
+      <button class="warn" id="resetAll">Cancella tutti i referti</button>
+    </div>
+    <div class="result-list" style="margin-top:12px;">
+      <table>
+        <thead><tr><th>ID</th><th>Categoria</th><th>Gara</th><th>Risultato</th><th>Data inserimento</th><th>Azione</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+const categorie = ['UNDER14','UNDER15','UNDER16','UNDER17','UNDER19'];
+const gironi = ['A','B','SEMIFINALE','FINALE'];
+const giornate = ['1','2','3','4','5','SEMIFINALE','FINALE'];
+const squadre = ['ACADEMY CYNTHIA GENZANO','ACCADEMIA TORRENOVA','ALBACYNTHIA','ALBALONGA','ATLETICO LARIANO','COLLEFERRO CALCIO','CYNTHIA 1920','DREAMING FOOTBALL ACADEMY','F. A. G. GIANNINI','NEXT GEN LODIGIANI','POLISPORTIVA CIAMPINO','PRO CALCIO CECCHINA','R11 SIMONETTA','REAL APRILIA','REAL VIS ARTENA','SPQV VELLETRI CALCIO','TOR TRE TESTE NEXT GEN','VJS VELLETRI'];
+const campi = ["CITTA' DELL'INFIORATA",'BRUNO ABBATINI'];
+const k='torneo_referti_2026';
+const qs=id=>document.getElementById(id);
+
+function fillSelect(id, values, placeholder) {
+  const first = `<option value="" selected disabled>${placeholder}</option>`;
+  qs(id).innerHTML = first + values.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+function loadReferti(){ return JSON.parse(localStorage.getItem(k)||'[]'); }
+
+function init(){
+  fillSelect('categoria', categorie, 'Seleziona categoria');
+  fillSelect('girone', gironi, 'Seleziona girone');
+  fillSelect('giornata', giornate, 'Seleziona giornata');
+  fillSelect('squadraCasa', squadre, 'Seleziona squadra casa');
+  fillSelect('squadraOspite', squadre, 'Seleziona squadra ospite');
+  fillSelect('campo', campi, 'Seleziona campo');
+
+  qs('dataGara').value = '';
+
+  document.querySelectorAll('input[type="text"], textarea').forEach(el => el.addEventListener('input', () => { el.value = el.value.toUpperCase(); }));
+  qs('salva').addEventListener('click',salvaReferto);
+  qs('nuovo').addEventListener('click',pulisciCampi);
+  qs('exportPdf').addEventListener('click',exportPdfSingolo);
+  qs('shareQuick').addEventListener('click',condivisioneRapida);
+  qs('resetAll').addEventListener('click',()=>{if(confirm('Confermi cancellazione completa?')){localStorage.removeItem(k);renderReferti();}});
+  renderReferti();
+}
+
+function pulisciCampi(){
+  ['golCasa','golOspite','arbitro','ammCasa','ammOspite','espulsiCasa','espulsiOspite','note'].forEach(x=>qs(x).value=x.includes('gol')?'0':'');
+  qs('noAmmonitiCasa').checked = false;
+  qs('noAmmonitiOspite').checked = false;
+  qs('noEspulsiCasa').checked = false;
+  qs('noEspulsiOspite').checked = false;
+  qs('noNote').checked = false;
+}
+
+function salvaReferto(){
+  const casa = qs('squadraCasa').value;
+  const ospite = qs('squadraOspite').value;
+  const noAmmonitiCasa = qs('noAmmonitiCasa').checked;
+  const noAmmonitiOspite = qs('noAmmonitiOspite').checked;
+  const noEspulsiCasa = qs('noEspulsiCasa').checked;
+  const noEspulsiOspite = qs('noEspulsiOspite').checked;
+  const ammCasaCompilati = qs('ammCasa').value.trim();
+  const ammOspiteCompilati = qs('ammOspite').value.trim();
+  const espCasaCompilati = qs('espulsiCasa').value.trim();
+  const espOspiteCompilati = qs('espulsiOspite').value.trim();
+  const noNote = qs('noNote').checked;
+
+  if (!qs('dataGara').value || !qs('categoria').value || !qs('girone').value || !qs('giornata').value || !casa || !ospite || !qs('campo').value || !qs('arbitro').value.trim() || qs('golCasa').value === '' || qs('golOspite').value === '') {
+    return alert('Compila tutti i campi principali del referto prima di salvare.');
+  }
+  if (!noNote && !qs('note').value.trim()) return alert('Inserisci le note disciplinari o spunta Nessuna nota disciplinare / gara.');
+  if (!noAmmonitiCasa && !ammCasaCompilati) return alert('Inserisci ammoniti casa o spunta Nessun ammonito casa.');
+  if (!noAmmonitiOspite && !ammOspiteCompilati) return alert('Inserisci ammoniti ospite o spunta Nessun ammonito ospite.');
+  if (!noEspulsiCasa && !espCasaCompilati) return alert('Inserisci espulsi casa o spunta Nessun espulso casa.');
+  if (!noEspulsiOspite && !espOspiteCompilati) return alert('Inserisci espulsi ospite o spunta Nessun espulso ospite.');
+  if (casa === ospite) return alert('Squadra casa e ospite non possono coincidere.');
+
+  const all = loadReferti();
+  const ref = {
+    id: crypto.randomUUID(),
+    dataOra: qs('dataGara').value,
+    categoria: qs('categoria').value,
+    girone: qs('girone').value,
+    giornata: qs('giornata').value,
+    campo: qs('campo').value,
+    casa,
+    ospite,
+    risultato:`${Number(qs('golCasa').value)}-${Number(qs('golOspite').value)}`,
+    arbitro:qs('arbitro').value.trim().toUpperCase(),
+    ammonitiCasa:noAmmonitiCasa ? [] : qs('ammCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    ammonitiOspite:noAmmonitiOspite ? [] : qs('ammOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiCasa:noEspulsiCasa ? [] : qs('espulsiCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiOspite:noEspulsiOspite ? [] : qs('espulsiOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    nessunAmmonitoCasa:noAmmonitiCasa,
+    nessunAmmonitoOspite:noAmmonitiOspite,
+    nessunEspulsoCasa:noEspulsiCasa,
+    nessunEspulsoOspite:noEspulsiOspite,
+    note:noNote ? '' : qs('note').value.trim().toUpperCase(),
+    inseritoIl:new Date().toISOString()
+  };
+
+  all.push(ref);
+  localStorage.setItem(k,JSON.stringify(all));
+  renderReferti();
+  alert('Referto salvato correttamente.');
+}
+
+function renderReferti(){
+  const rows=loadReferti().map(r=>`<tr><td>${r.id.slice(0,8)}</td><td>${r.categoria}</td><td>${r.casa} - ${r.ospite}<br><small>${r.dataOra} | ${r.girone} | ${r.giornata} | ${r.campo}</small></td><td>${r.risultato}</td><td>${new Date(r.inseritoIl).toLocaleString('it-IT')}</td><td><button class="warn" onclick="cancellaRefertoSingolo('${r.id}')">Cancella</button></td></tr>`).join('');
+  qs('tbody').innerHTML=rows||'<tr><td colspan="6">Nessun referto inserito.</td></tr>';
+  refreshSavedRefertiSelect();
+}
+
+function cancellaRefertoSingolo(id){
+  if (!confirm('Confermi cancellazione di questo referto?')) return;
+  const updated = loadReferti().filter(r => r.id !== id);
+  localStorage.setItem(k, JSON.stringify(updated));
+  renderReferti();
+}
+
+function refreshSavedRefertiSelect(){
+  const all = loadReferti();
+  qs('savedReferto').innerHTML = '<option value="">Seleziona gara salvata</option>' + all.map(r => `<option value="${r.id}">${buildExportBaseName(r)}.json</option>`).join('');
+}
+
+function getCurrentRefertoDraft(){
+  return {
+    id: 'DRAFT',
+    dataOra: qs('dataGara').value,
+    categoria: qs('categoria').value,
+    girone: qs('girone').value,
+    giornata: qs('giornata').value,
+    campo: qs('campo').value,
+    casa: qs('squadraCasa').value,
+    ospite: qs('squadraOspite').value,
+    risultato:`${Number(qs('golCasa').value)}-${Number(qs('golOspite').value)}`,
+    arbitro:qs('arbitro').value.trim().toUpperCase(),
+    ammonitiCasa:qs('noAmmonitiCasa').checked ? [] : qs('ammCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    ammonitiOspite:qs('noAmmonitiOspite').checked ? [] : qs('ammOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiCasa:qs('noEspulsiCasa').checked ? [] : qs('espulsiCasa').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    espulsiOspite:qs('noEspulsiOspite').checked ? [] : qs('espulsiOspite').value.split('\n').map(x=>x.trim().toUpperCase()).filter(Boolean),
+    nessunAmmonitoCasa:qs('noAmmonitiCasa').checked,
+    nessunAmmonitoOspite:qs('noAmmonitiOspite').checked,
+    nessunEspulsoCasa:qs('noEspulsiCasa').checked,
+    nessunEspulsoOspite:qs('noEspulsiOspite').checked,
+    note:qs('note').value.trim().toUpperCase(),
+    inseritoIl:new Date().toISOString()
+  };
+}
+
+function getRefertoPerExport(){
+  if (qs('exportMode').value === 'current') return getCurrentRefertoDraft();
+  const selectedId = qs('savedReferto').value;
+  const ref = loadReferti().find(r => r.id === selectedId);
+  if (!ref) { alert('Seleziona una gara salvata da esportare.'); return null; }
+  return ref;
+}
+
+function buildExportBaseName(ref){
+  const safe = v => String(v || '').toUpperCase().replaceAll(' ', '_').replaceAll('/', '-').replaceAll("'", '').replace(/[^A-Z0-9_-]/g, '');
+  const categoria = safe(ref.categoria || 'CATEGORIA');
+  const casa = safe(ref.casa || 'CASA');
+  const ospite = safe(ref.ospite || 'OSPITE');
+  const data = safe((ref.dataOra || '').replace('T','_').replace(':','-'));
+  return `REF_${categoria}_${data}_${casa}_VS_${ospite}`;
+}
+
+function exportPdfSingolo(){
+  const ref = getRefertoPerExport(); if(!ref) return;
+  const blob = buildPdfBlob(ref);
+  if (!blob) return alert('Errore nella generazione del PDF.');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${buildExportBaseName(ref)}.pdf`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function buildExportPayload(ref){
+  return {
+    id: ref.id,
+    dataOra: ref.dataOra,
+    categoria: ref.categoria,
+    girone: ref.girone,
+    giornata: ref.giornata,
+    campo: ref.campo,
+    squadraCasa: ref.casa,
+    squadraOspite: ref.ospite,
+    risultato: ref.risultato,
+    arbitro: ref.arbitro,
+    ammonitiSquadraCasa: ref.nessunAmmonitoCasa ? [] : (ref.ammonitiCasa || []),
+    ammonitiSquadraOspite: ref.nessunAmmonitoOspite ? [] : (ref.ammonitiOspite || []),
+    espulsiSquadraCasa: ref.nessunEspulsoCasa ? [] : (ref.espulsiCasa || []),
+    espulsiSquadraOspite: ref.nessunEspulsoOspite ? [] : (ref.espulsiOspite || []),
+    note: ref.note || '',
+    inseritoIl: ref.inseritoIl
+  };
+}
+
+function creaTestoCondivisione(ref){
+  const payload = buildExportPayload(ref);
+  const ammCasa = payload.ammonitiSquadraCasa.join(', ') || 'NESSUNO';
+  const ammOspite = payload.ammonitiSquadraOspite.join(', ') || 'NESSUNO';
+  const espCasa = payload.espulsiSquadraCasa.join(', ') || 'NESSUNO';
+  const espOspite = payload.espulsiSquadraOspite.join(', ') || 'NESSUNO';
+  return `TORNEO CITTA DELL'INFIORATA 2026
+REF: ${ref.id}
+DATA/ORA: ${payload.dataOra}
+CATEGORIA: ${payload.categoria} | GIRONE: ${payload.girone} | GIORNATA: ${payload.giornata}
+CAMPO: ${payload.campo}
+GARA: ${payload.squadraCasa} - ${payload.squadraOspite}
+RISULTATO: ${payload.risultato}
+ARBITRO: ${payload.arbitro}
+AMMONITI ${payload.squadraCasa}: ${ammCasa}
+AMMONITI ${payload.squadraOspite}: ${ammOspite}
+ESPULSI ${payload.squadraCasa}: ${espCasa}
+ESPULSI ${payload.squadraOspite}: ${espOspite}
+NOTE: ${payload.note || '-'}`;
+}
+
+async function condivisioneRapida(){
+  const ref = getRefertoPerExport(); if(!ref) return;
+  const text = creaTestoCondivisione(ref);
+  const pdfFile = await buildPdfFileForShare(ref);
+  if (navigator.share) {
+    try {
+      const data = {
+        title: `Referto ${ref.categoria} ${ref.casa} vs ${ref.ospite}`,
+        text
+      };
+      if (pdfFile && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        data.files = [pdfFile];
+      }
+      await navigator.share(data);
+    } catch (_) {}
+    return;
+  }
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    alert('Condivisione rapida non supportata: testo copiato negli appunti.');
+    return;
+  }
+  alert(text);
+}
+
+async function buildPdfFileForShare(ref){
+  try {
+    const blob = buildPdfBlob(ref);
+    if (!blob) return null;
+    return new File([blob], `${buildExportBaseName(ref)}.pdf`, { type: 'application/pdf' });
+  } catch (_) {
+    return null;
+  }
+}
+
+function buildPdfBlob(ref){
+  const payload = buildExportPayload(ref);
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF) return null;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 36;
+  const contentW = pageW - margin * 2;
+  let y = 40;
+
+  doc.setFillColor(47, 103, 199);
+  doc.rect(margin, y - 20, contentW, 28, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.text("INSERIMENTO REFERTI ARBITRALI - TORNEO CITTA DELL'INFIORATA 2026", margin + 8, y - 2);
+  y += 20;
+
+  doc.setTextColor(20, 20, 20);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const meta = [
+    [`REF ID`, payload.id || ''],
+    [`DATA/ORA`, payload.dataOra || ''],
+    [`CATEGORIA`, payload.categoria || ''],
+    [`GIRONE`, payload.girone || ''],
+    [`GIORNATA`, payload.giornata || ''],
+    [`CAMPO`, payload.campo || ''],
+    [`ARBITRO`, payload.arbitro || ''],
+    [`GARA`, `${payload.squadraCasa || ''} - ${payload.squadraOspite || ''}`],
+    [`RISULTATO`, payload.risultato || '']
+  ];
+  meta.forEach(([k,v]) => {
+    doc.setFont('helvetica', 'bold'); doc.text(`${k}:`, margin, y);
+    doc.setFont('helvetica', 'normal'); doc.text(String(v), margin + 90, y);
+    y += 14;
+  });
+
+  y += 4;
+  doc.setDrawColor(180);
+  doc.line(margin, y, pageW - margin, y);
+  y += 14;
+
+  function writeBlock(title, text, bg){
+    const lines = doc.splitTextToSize(text || 'NESSUNO', contentW - 16);
+    const h = Math.max(24, lines.length * 12 + 10);
+    doc.setFillColor(...bg);
+    doc.rect(margin, y - 10, contentW, h, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(0,0,0); doc.text(title, margin + 8, y + 2);
+    doc.setFont('helvetica', 'normal'); doc.text(lines, margin + 8, y + 16);
+    y += h + 8;
+  }
+
+  writeBlock(`AMMONITI ${payload.squadraCasa}`, (payload.ammonitiSquadraCasa || []).join(', ') || 'NESSUNO', [255, 239, 166]);
+  writeBlock(`AMMONITI ${payload.squadraOspite}`, (payload.ammonitiSquadraOspite || []).join(', ') || 'NESSUNO', [255, 239, 166]);
+  writeBlock(`ESPULSI ${payload.squadraCasa}`, (payload.espulsiSquadraCasa || []).join(', ') || 'NESSUNO', [255, 196, 196]);
+  writeBlock(`ESPULSI ${payload.squadraOspite}`, (payload.espulsiSquadraOspite || []).join(', ') || 'NESSUNO', [255, 196, 196]);
+  writeBlock('NOTE DISCIPLINARI / GARA', payload.note || '-', [232, 242, 255]);
+
+  return doc.output('blob');
+}
+
+function download(name,content,type){
+  const blob=new Blob([content],{type});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+
+init();
+</script>
+</body>
+</html>
