@@ -153,6 +153,7 @@ const squadre = ['ACADEMY CYNTHIA GENZANO','ACCADEMIA TORRENOVA','ALBACYNTHIA','
 const campi = ["CITTA' DELL'INFIORATA",'BRUNO ABBATINI'];
 const k='torneo_referti_2026';
 const kWebhook='torneo_google_webhook';
+const defaultWebhook='https://script.google.com/macros/s/AKfycbwxLlp0iNB15_sANzdgZZGI5LrOgUhSr9g8Ind6Lgv1LfoyidU-c3-2MZM7UwmSZcq0/exec';
 const qs=id=>document.getElementById(id);
 
 function fillSelect(id, values, placeholder) {
@@ -181,7 +182,7 @@ function init(){
   qs('sendGoogle').addEventListener('click',inviaGoogleSheets);
   qs('saveWebhook').addEventListener('click',salvaWebhook);
   qs('resetAll').addEventListener('click',()=>{if(confirm('Confermi cancellazione completa?')){localStorage.removeItem(k);renderReferti();}});
-  qs('googleWebhook').value = localStorage.getItem(kWebhook) || '';
+  qs('googleWebhook').value = localStorage.getItem(kWebhook) || defaultWebhook;
   renderReferti();
 }
 
@@ -405,15 +406,17 @@ async function inviaGoogleSheets(){
   const ref = getRefertoPerExport(); if(!ref) return;
   const payload = buildExportPayload(ref);
   try {
-    const res = await fetch(webhook, {
+    // Apps Script spesso blocca richieste CORS con Content-Type application/json (preflight).
+    // Con no-cors + text/plain l'invio passa anche da mobile/browser restrittivi.
+    await fetch(webhook, {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
+      mode: 'no-cors',
+      headers: {'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    alert('Referto inviato correttamente a Google Sheets.');
+    alert('Referto inviato. Se non lo vedi nel foglio, verifica che il deploy Apps Script sia pubblico (Anyone with the link).');
   } catch (e) {
-    alert(`Invio fallito: ${e.message}`);
+    alert(`Invio fallito: ${e.message}. Controlla che l'URL sia corretto e il deploy sia attivo.`);
   }
 }
 
