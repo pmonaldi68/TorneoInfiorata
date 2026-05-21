@@ -382,29 +382,60 @@ function buildPdfBlob(ref){
   const { jsPDF } = window.jspdf || {};
   if (!jsPDF) return null;
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-  const lines = [
-    "TORNEO CITTA DELL'INFIORATA 2026",
-    `REF: ${payload.id || ''}`,
-    `DATA/ORA: ${payload.dataOra || ''}`,
-    `CATEGORIA: ${payload.categoria || ''} | GIRONE: ${payload.girone || ''} | GIORNATA: ${payload.giornata || ''}`,
-    `CAMPO: ${payload.campo || ''}`,
-    `GARA: ${payload.squadraCasa || ''} - ${payload.squadraOspite || ''}`,
-    `RISULTATO: ${payload.risultato || ''}`,
-    `ARBITRO: ${payload.arbitro || ''}`,
-    `AMMONITI ${payload.squadraCasa}: ${(payload.ammonitiSquadraCasa || []).join(', ') || 'NESSUNO'}`,
-    `AMMONITI ${payload.squadraOspite}: ${(payload.ammonitiSquadraOspite || []).join(', ') || 'NESSUNO'}`,
-    `ESPULSI ${payload.squadraCasa}: ${(payload.espulsiSquadraCasa || []).join(', ') || 'NESSUNO'}`,
-    `ESPULSI ${payload.squadraOspite}: ${(payload.espulsiSquadraOspite || []).join(', ') || 'NESSUNO'}`,
-    `NOTE: ${payload.note || '-'}`
-  ];
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 36;
+  const contentW = pageW - margin * 2;
   let y = 40;
-  lines.forEach(line => {
-    const wrapped = doc.splitTextToSize(line, 540);
-    doc.text(wrapped, 36, y);
-    y += (wrapped.length * 14);
+
+  doc.setFillColor(47, 103, 199);
+  doc.rect(margin, y - 20, contentW, 28, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.text("INSERIMENTO REFERTI ARBITRALI - TORNEO CITTA DELL'INFIORATA 2026", margin + 8, y - 2);
+  y += 20;
+
+  doc.setTextColor(20, 20, 20);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const meta = [
+    [`REF ID`, payload.id || ''],
+    [`DATA/ORA`, payload.dataOra || ''],
+    [`CATEGORIA`, payload.categoria || ''],
+    [`GIRONE`, payload.girone || ''],
+    [`GIORNATA`, payload.giornata || ''],
+    [`CAMPO`, payload.campo || ''],
+    [`ARBITRO`, payload.arbitro || ''],
+    [`GARA`, `${payload.squadraCasa || ''} - ${payload.squadraOspite || ''}`],
+    [`RISULTATO`, payload.risultato || '']
+  ];
+  meta.forEach(([k,v]) => {
+    doc.setFont('helvetica', 'bold'); doc.text(`${k}:`, margin, y);
+    doc.setFont('helvetica', 'normal'); doc.text(String(v), margin + 90, y);
+    y += 14;
   });
+
+  y += 4;
+  doc.setDrawColor(180);
+  doc.line(margin, y, pageW - margin, y);
+  y += 14;
+
+  function writeBlock(title, text, bg){
+    const lines = doc.splitTextToSize(text || 'NESSUNO', contentW - 16);
+    const h = Math.max(24, lines.length * 12 + 10);
+    doc.setFillColor(...bg);
+    doc.rect(margin, y - 10, contentW, h, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(0,0,0); doc.text(title, margin + 8, y + 2);
+    doc.setFont('helvetica', 'normal'); doc.text(lines, margin + 8, y + 16);
+    y += h + 8;
+  }
+
+  writeBlock(`AMMONITI ${payload.squadraCasa}`, (payload.ammonitiSquadraCasa || []).join(', ') || 'NESSUNO', [255, 239, 166]);
+  writeBlock(`AMMONITI ${payload.squadraOspite}`, (payload.ammonitiSquadraOspite || []).join(', ') || 'NESSUNO', [255, 239, 166]);
+  writeBlock(`ESPULSI ${payload.squadraCasa}`, (payload.espulsiSquadraCasa || []).join(', ') || 'NESSUNO', [255, 196, 196]);
+  writeBlock(`ESPULSI ${payload.squadraOspite}`, (payload.espulsiSquadraOspite || []).join(', ') || 'NESSUNO', [255, 196, 196]);
+  writeBlock('NOTE DISCIPLINARI / GARA', payload.note || '-', [232, 242, 255]);
+
   return doc.output('blob');
 }
 
