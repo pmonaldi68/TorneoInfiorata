@@ -8,6 +8,7 @@ Mini web app per la raccolta referti arbitri del **Torneo Città dell'Infiorata 
 - Salvataggio locale sul dispositivo arbitro (LocalStorage).
 - Elenco referti compilati.
 - Export in JSON e CSV da inviare all'organizzazione.
+- Invio diretto del singolo referto a Google Sheets tramite webhook Google Apps Script.
 
 ## Avvio
 È un'app statica, basta aprire `index.html` in un browser (anche da smartphone).

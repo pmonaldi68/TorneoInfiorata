@@ -108,6 +108,16 @@
     <h3>3) Referti inseriti</h3>
     <div class="grid grid-3" style="margin-bottom:10px;">
       <div>
+        <label for="googleWebhook">Webhook Google Apps Script</label>
+        <input id="googleWebhook" type="text" placeholder="INCOLLA URL WEB APP GOOGLE APPS SCRIPT" />
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button class="secondary" id="saveWebhook">Salva webhook</button>
+      </div>
+    </div>
+    <div class="grid grid-3" style="margin-bottom:10px;">
+      <div>
         <label for="exportMode">Esporta</label>
         <select id="exportMode">
           <option value="current">Gara attualmente inserita</option>
@@ -124,6 +134,7 @@
       <button class="secondary" id="exportCsv">Esporta CSV</button>
       <button class="secondary" id="exportPdf">Esporta PDF</button>
       <button class="secondary" id="shareQuick">Condivisione rapida</button>
+      <button class="secondary" id="sendGoogle">Invia a Google Sheets</button>
       <button class="warn" id="resetAll">Cancella tutti i referti</button>
     </div>
     <div class="result-list" style="margin-top:12px;">
@@ -141,6 +152,7 @@ const giornate = ['1','2','3','4','5','SEMIFINALE','FINALE'];
 const squadre = ['ACADEMY CYNTHIA GENZANO','ACCADEMIA CALCIO FRASCATI','ACCADEMIA TORRENOVA','ALBACYNTHIA','ALBALONGA','ARICCIA CALCIO','ATLETICO LARIANO','BARBATO FOOTBALL ACADEMY','COLLEFERRO CALCIO','CYNTHIA 1920','DREAMING FOOTBALL ACADEMY','F. A. G. GIANNINI','NEXT GEN LODIGIANI','POLISPORTIVA CIAMPINO','PRO CALCIO CECCHINA','REAL APRILIA','VJS VELLETRI'];
 const campi = ["CITTA' DELL'INFIORATA",'BRUNO ABBATINI'];
 const k='torneo_referti_2026';
+const kWebhook='torneo_google_webhook';
 const qs=id=>document.getElementById(id);
 
 function fillSelect(id, values, placeholder) {
@@ -166,8 +178,18 @@ function init(){
   qs('exportCsv').addEventListener('click',exportCsvSingolo);
   qs('exportPdf').addEventListener('click',exportPdfSingolo);
   qs('shareQuick').addEventListener('click',condivisioneRapida);
+  qs('sendGoogle').addEventListener('click',inviaGoogleSheets);
+  qs('saveWebhook').addEventListener('click',salvaWebhook);
   qs('resetAll').addEventListener('click',()=>{if(confirm('Confermi cancellazione completa?')){localStorage.removeItem(k);renderReferti();}});
+  qs('googleWebhook').value = localStorage.getItem(kWebhook) || '';
   renderReferti();
+}
+
+function salvaWebhook(){
+  const url = qs('googleWebhook').value.trim();
+  if (!url) return alert('Inserisci URL webhook Google Apps Script.');
+  localStorage.setItem(kWebhook, url);
+  alert('Webhook salvato.');
 }
 
 function pulisciCampi(){
@@ -375,6 +397,24 @@ async function condivisioneRapida(){
     return;
   }
   alert(text);
+}
+
+async function inviaGoogleSheets(){
+  const webhook = (qs('googleWebhook').value || localStorage.getItem(kWebhook) || '').trim();
+  if (!webhook) return alert('Configura prima il webhook Google Apps Script.');
+  const ref = getRefertoPerExport(); if(!ref) return;
+  const payload = buildExportPayload(ref);
+  try {
+    const res = await fetch(webhook, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    alert('Referto inviato correttamente a Google Sheets.');
+  } catch (e) {
+    alert(`Invio fallito: ${e.message}`);
+  }
 }
 
 function download(name,content,type){
