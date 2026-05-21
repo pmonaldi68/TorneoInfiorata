@@ -132,6 +132,7 @@
     </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
 const categorie = ['UNDER14','UNDER15','UNDER16','UNDER17','UNDER19'];
 const gironi = ['A','B','SEMIFINALE','FINALE'];
@@ -341,12 +342,17 @@ NOTE: ${payload.note || '-'}`;
 async function condivisioneRapida(){
   const ref = getRefertoPerExport(); if(!ref) return;
   const text = creaTestoCondivisione(ref);
+  const pdfFile = await buildPdfFileForShare(ref);
   if (navigator.share) {
     try {
-      await navigator.share({
+      const data = {
         title: `Referto ${ref.categoria} ${ref.casa} vs ${ref.ospite}`,
         text
-      });
+      };
+      if (pdfFile && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        data.files = [pdfFile];
+      }
+      await navigator.share(data);
     } catch (_) {}
     return;
   }
@@ -356,6 +362,42 @@ async function condivisioneRapida(){
     return;
   }
   alert(text);
+}
+
+async function buildPdfFileForShare(ref){
+  try {
+    const payload = buildExportPayload(ref);
+    const { jsPDF } = window.jspdf || {};
+    if (!jsPDF) return null;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const lines = [
+      "TORNEO CITTA DELL'INFIORATA 2026",
+      `REF: ${payload.id || ''}`,
+      `DATA/ORA: ${payload.dataOra || ''}`,
+      `CATEGORIA: ${payload.categoria || ''} | GIRONE: ${payload.girone || ''} | GIORNATA: ${payload.giornata || ''}`,
+      `CAMPO: ${payload.campo || ''}`,
+      `GARA: ${payload.squadraCasa || ''} - ${payload.squadraOspite || ''}`,
+      `RISULTATO: ${payload.risultato || ''}`,
+      `ARBITRO: ${payload.arbitro || ''}`,
+      `AMMONITI ${payload.squadraCasa}: ${(payload.ammonitiSquadraCasa || []).join(', ') || 'NESSUNO'}`,
+      `AMMONITI ${payload.squadraOspite}: ${(payload.ammonitiSquadraOspite || []).join(', ') || 'NESSUNO'}`,
+      `ESPULSI ${payload.squadraCasa}: ${(payload.espulsiSquadraCasa || []).join(', ') || 'NESSUNO'}`,
+      `ESPULSI ${payload.squadraOspite}: ${(payload.espulsiSquadraOspite || []).join(', ') || 'NESSUNO'}`,
+      `NOTE: ${payload.note || '-'}`
+    ];
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    let y = 40;
+    lines.forEach(line => {
+      const wrapped = doc.splitTextToSize(line, 540);
+      doc.text(wrapped, 36, y);
+      y += (wrapped.length * 14);
+    });
+    const blob = doc.output('blob');
+    return new File([blob], `${buildExportBaseName(ref)}.pdf`, { type: 'application/pdf' });
+  } catch (_) {
+    return null;
+  }
 }
 
 function download(name,content,type){
