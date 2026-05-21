@@ -12,3 +12,11 @@ Mini web app per la raccolta referti arbitri del **Torneo Città dell'Infiorata 
 
 ## Avvio
 È un'app statica, basta aprire `index.html` in un browser (anche da smartphone).
+
+
+## Google Sheets (opzionale)
+- Nel repository trovi `google-apps-script.gs` già pronto.
+- Crea un Google Sheet, apri **Extensions > Apps Script** e incolla il contenuto.
+- Fai deploy come **Web app** (accesso con link).
+- Copia l'URL del deploy e incollalo nel campo **Webhook Google Apps Script** dell'app.
+- Da quel momento, con **Invia a Google Sheets** il referto selezionato viene scritto nel foglio `Referti`.
