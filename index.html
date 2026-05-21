@@ -290,11 +290,14 @@ function buildExportBaseName(ref){
 }
 
 function exportPdfSingolo(){
-  const r = getRefertoPerExport(); if(!r) return;
-  const payload = buildExportPayload(r);
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${buildExportBaseName(r)}</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px;}h2{margin-top:0;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;vertical-align:top;} .blk{margin:10px 0;}</style></head><body><h2>Referto Gara - Torneo Città dell'Infiorata 2026</h2><div class="blk"><b>Categoria:</b> ${payload.categoria} | <b>Girone:</b> ${payload.girone} | <b>Giornata:</b> ${payload.giornata}<br><b>Data/Ora:</b> ${payload.dataOra} | <b>Campo:</b> ${payload.campo}<br><b>Gara:</b> ${payload.squadraCasa} - ${payload.squadraOspite} | <b>Risultato:</b> ${payload.risultato}<br><b>Arbitro:</b> ${payload.arbitro}</div><table><tr><th>Ammoniti ${payload.squadraCasa}</th><th>Ammoniti ${payload.squadraOspite}</th></tr><tr><td>${payload.ammonitiSquadraCasa.join('<br>') || 'NESSUNO'}</td><td>${payload.ammonitiSquadraOspite.join('<br>') || 'NESSUNO'}</td></tr><tr><th>Espulsi ${payload.squadraCasa}</th><th>Espulsi ${payload.squadraOspite}</th></tr><tr><td>${payload.espulsiSquadraCasa.join('<br>') || 'NESSUNO'}</td><td>${payload.espulsiSquadraOspite.join('<br>') || 'NESSUNO'}</td></tr></table><div class="blk"><b>Note:</b><br>${payload.note||''}</div></body></html>`;
-  const w = window.open('', '_blank');
-  w.document.write(html); w.document.close(); w.focus(); w.print();
+  const ref = getRefertoPerExport(); if(!ref) return;
+  const blob = buildPdfBlob(ref);
+  if (!blob) return alert('Errore nella generazione del PDF.');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${buildExportBaseName(ref)}.pdf`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function buildExportPayload(ref){
@@ -366,38 +369,43 @@ async function condivisioneRapida(){
 
 async function buildPdfFileForShare(ref){
   try {
-    const payload = buildExportPayload(ref);
-    const { jsPDF } = window.jspdf || {};
-    if (!jsPDF) return null;
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const lines = [
-      "TORNEO CITTA DELL'INFIORATA 2026",
-      `REF: ${payload.id || ''}`,
-      `DATA/ORA: ${payload.dataOra || ''}`,
-      `CATEGORIA: ${payload.categoria || ''} | GIRONE: ${payload.girone || ''} | GIORNATA: ${payload.giornata || ''}`,
-      `CAMPO: ${payload.campo || ''}`,
-      `GARA: ${payload.squadraCasa || ''} - ${payload.squadraOspite || ''}`,
-      `RISULTATO: ${payload.risultato || ''}`,
-      `ARBITRO: ${payload.arbitro || ''}`,
-      `AMMONITI ${payload.squadraCasa}: ${(payload.ammonitiSquadraCasa || []).join(', ') || 'NESSUNO'}`,
-      `AMMONITI ${payload.squadraOspite}: ${(payload.ammonitiSquadraOspite || []).join(', ') || 'NESSUNO'}`,
-      `ESPULSI ${payload.squadraCasa}: ${(payload.espulsiSquadraCasa || []).join(', ') || 'NESSUNO'}`,
-      `ESPULSI ${payload.squadraOspite}: ${(payload.espulsiSquadraOspite || []).join(', ') || 'NESSUNO'}`,
-      `NOTE: ${payload.note || '-'}`
-    ];
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    let y = 40;
-    lines.forEach(line => {
-      const wrapped = doc.splitTextToSize(line, 540);
-      doc.text(wrapped, 36, y);
-      y += (wrapped.length * 14);
-    });
-    const blob = doc.output('blob');
+    const blob = buildPdfBlob(ref);
+    if (!blob) return null;
     return new File([blob], `${buildExportBaseName(ref)}.pdf`, { type: 'application/pdf' });
   } catch (_) {
     return null;
   }
+}
+
+function buildPdfBlob(ref){
+  const payload = buildExportPayload(ref);
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF) return null;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const lines = [
+    "TORNEO CITTA DELL'INFIORATA 2026",
+    `REF: ${payload.id || ''}`,
+    `DATA/ORA: ${payload.dataOra || ''}`,
+    `CATEGORIA: ${payload.categoria || ''} | GIRONE: ${payload.girone || ''} | GIORNATA: ${payload.giornata || ''}`,
+    `CAMPO: ${payload.campo || ''}`,
+    `GARA: ${payload.squadraCasa || ''} - ${payload.squadraOspite || ''}`,
+    `RISULTATO: ${payload.risultato || ''}`,
+    `ARBITRO: ${payload.arbitro || ''}`,
+    `AMMONITI ${payload.squadraCasa}: ${(payload.ammonitiSquadraCasa || []).join(', ') || 'NESSUNO'}`,
+    `AMMONITI ${payload.squadraOspite}: ${(payload.ammonitiSquadraOspite || []).join(', ') || 'NESSUNO'}`,
+    `ESPULSI ${payload.squadraCasa}: ${(payload.espulsiSquadraCasa || []).join(', ') || 'NESSUNO'}`,
+    `ESPULSI ${payload.squadraOspite}: ${(payload.espulsiSquadraOspite || []).join(', ') || 'NESSUNO'}`,
+    `NOTE: ${payload.note || '-'}`
+  ];
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  let y = 40;
+  lines.forEach(line => {
+    const wrapped = doc.splitTextToSize(line, 540);
+    doc.text(wrapped, 36, y);
+    y += (wrapped.length * 14);
+  });
+  return doc.output('blob');
 }
 
 function download(name,content,type){
